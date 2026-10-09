@@ -1,52 +1,669 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f6f8f2"><meta name="description" content="点亮一家人走过的地方，收藏旅行照片与回忆。"><title>我们的旅行地图 · 家庭旅行地图</title>
-<style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#2b4941;background:#f6f8f2;font-synthesis:none;--green:#277d69;--muted:#829088;--gold:#f4c859}*{box-sizing:border-box}body{margin:0}button,input,textarea{font:inherit}button{cursor:pointer;color:inherit}.app{display:grid;grid-template-columns:310px minmax(0,1fr);height:100dvh;min-height:590px}.rail{background:#fffef9;border-right:1px solid #dce7da;padding:26px 22px;display:flex;flex-direction:column;z-index:2}.brand{display:flex;gap:12px;align-items:center}.brand-icon{width:42px;height:42px;border-radius:14px;background:var(--green);color:white;display:grid;place-items:center;font-size:22px}.brand h1{font-size:18px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:5px 0 0}.summary{margin:22px 0 18px;color:#708177;font-size:13px;line-height:1.8}.stats{display:flex;gap:9px;margin-bottom:23px}.stat{padding:12px 14px;border:1px solid #e5ebdf;background:#f3f6ed;border-radius:15px;flex:1}.stat b{display:block;font-size:23px}.stat span{display:block;font-size:11px;color:#829080;margin-top:2px}.head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600}.badge{font-size:10px;font-weight:400;background:#f8efda;color:#88724e;border-radius:12px;padding:5px 8px}.list{flex:1;overflow:auto;margin-top:10px}.row{display:block;width:100%;text-align:left;border:1px solid #e4ebdf;background:#f6f8f1;border-radius:13px;padding:12px;margin-bottom:8px}.row:hover{border-color:#c9d9c7}.row b{display:block;font-size:13px}.row span{display:block;color:#839083;font-size:11px;margin-top:4px}.empty{margin-top:6px;padding:20px 14px;border:1px dashed #d0dccb;border-radius:16px;color:#7f8d7e;font-size:12px;line-height:1.9}.foot{border-top:1px solid #e8ede3;padding-top:13px;font-size:10px;color:#879485;line-height:1.7}.map-shell{position:relative;overflow:hidden;background:#e9f1e9}.map{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.map.dragging{cursor:grabbing}.world-bg{fill:#cdddc1;stroke:#edf2e9;stroke-width:.55;stroke-linejoin:round;fill-rule:evenodd;cursor:pointer;transition:fill .2s,filter .2s}.world-bg:hover{fill:#b8d1a8}.region{fill:#cdddc1;stroke:#edf2e9;stroke-width:.8;stroke-linejoin:round;fill-rule:evenodd;cursor:pointer;transition:fill .2s,filter .2s}.region:hover{fill:#b8d1a8}.lit{fill:var(--gold)!important;filter:drop-shadow(0 0 3px #edae39) drop-shadow(0 0 8px #f7db7c)}.map-top{position:absolute;inset:18px 20px auto;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.caption,.status{pointer-events:auto;background:#fffff2e8;border:1px solid #dfe8da;box-shadow:0 4px 18px #33503d0c;border-radius:14px;padding:10px 13px}.caption b{font-size:13px;display:block}.caption small{font-size:10px;color:#849081;display:block;margin-top:3px}.status{font-size:10px;color:#758575;border-radius:22px;padding:9px 12px}.controls{position:absolute;right:17px;bottom:51px;display:grid;gap:7px}.control{width:39px;height:39px;border-radius:12px;border:1px solid #dce6d8;background:#fffef8;box-shadow:0 3px 10px #385a3710;font-size:20px}.control:hover,.secondary:hover{background:#f1f6eb}.map-footer{position:absolute;left:20px;bottom:16px;font-size:10px;color:#7f9080;pointer-events:none}.map-footer a{color:inherit;pointer-events:auto}.search{pointer-events:auto;display:flex;gap:5px}.search input{width:min(24vw,230px);border:1px solid #dce6d8;border-radius:12px;padding:9px 11px;background:#fffef8;font-size:12px;outline-color:#a8c49c}.search button{border:1px solid #dce6d8;background:#fffef8;border-radius:11px;padding:0 11px;font-size:11px}.crumb{position:absolute;left:20px;top:87px;background:#fffff2e8;border:1px solid #dfe8da;border-radius:12px;padding:8px 11px;font-size:11px;display:flex;align-items:center;gap:6px}.crumb button{border:0;background:none;color:#477362;padding:0}.crumb span{color:#91a092}.detail{position:absolute;top:18px;right:18px;bottom:52px;width:350px;max-width:calc(100% - 36px);overflow:auto;border:1px solid #dce7d8;border-radius:20px;background:#fffefb;box-shadow:0 14px 42px #34543d26;padding:20px;z-index:3}.detail[hidden]{display:none}.close{float:right;border:0;border-radius:50%;width:30px;height:30px;background:#eff3e9;font-size:19px}.detail h2{font-size:20px;margin:5px 0 6px}.sub{font-size:11px;color:#889586;margin-bottom:15px}.field{margin:13px 0}.field label{font-size:11px;color:#718175;display:block;margin-bottom:6px}.field input,.field textarea{width:100%;border:1px solid #dfe7da;border-radius:10px;background:#fff;padding:10px;font-size:12px;color:#314d42}.field textarea{resize:vertical;min-height:75px;line-height:1.65}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.photo{position:relative}.photo img{display:block;width:100%;height:80px;object-fit:cover;border-radius:9px;background:#edf1e8}.photo button{position:absolute;right:4px;top:4px;width:20px;height:20px;border:0;border-radius:50%;background:#fffdf0e8;color:#774d3b;font-size:14px}.actions{display:flex;gap:8px;margin-top:18px}.actions button{border:0;border-radius:10px;padding:10px 12px;font-size:12px}.save{background:var(--green);color:white;flex:1}.secondary{background:#edf2e8}.delete{background:#faeeea;color:#94594c}dialog{border:1px solid #dce5d5;border-radius:20px;padding:24px;width:380px;max-width:calc(100% - 30px);background:#fffef9;color:#36533f}dialog::backdrop{background:#25413455;backdrop-filter:blur(3px)}dialog h2{font-size:18px;margin:0 0 12px}dialog p{font-size:12px;color:#738276;line-height:1.8}.hint{font-size:10px;color:#809080;line-height:1.7;margin-top:8px}.toast{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:#365e4d;color:white;border-radius:22px;padding:9px 14px;font-size:11px;z-index:7;box-shadow:0 5px 20px #233c3240;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
-@media(max-width:720px){.app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);min-height:100dvh;height:100dvh}.rail{padding:13px 16px 7px;border:0;border-bottom:1px solid #dce7da}.brand-icon{width:34px;height:34px;border-radius:11px;font-size:18px}.brand h1{font-size:15px}.brand p,.summary,.stats,.head,.foot{display:none}.list{flex:none;display:flex;gap:7px;max-height:54px;overflow:auto;margin-top:3px}.row{width:auto;flex:none;padding:7px 10px;margin:0}.row b{font-size:11px}.row span{font-size:9px;margin-top:2px}.empty{display:none}.map-top{inset:12px 10px auto;gap:6px}.caption{padding:8px 9px}.caption b{font-size:11px}.caption small{font-size:9px}.search input{width:31vw;padding:8px;font-size:10px}.search button{font-size:10px;padding:0 8px}.status{display:none}.crumb{left:10px;top:58px;padding:6px 8px;font-size:10px}.controls{right:11px;bottom:43px}.control{width:35px;height:35px}.map-footer{left:11px;bottom:12px;font-size:9px}.detail{inset:10px 10px 42px;width:auto;max-width:none;padding:17px}.photo img{height:90px}}
-.world-bg,.region{fill:#d1ebe2;stroke:#9fc8bc;stroke-width:1;vector-effect:non-scaling-stroke}.world-bg:hover,.region:hover{fill:#bfe4d8}.lit{fill:#d1ebe2!important;stroke:#c18426!important;stroke-width:2;filter:drop-shadow(0 0 2px #eac06a)}.map-shell{background:#eaf2f6}.rail{background:#fff}.brand-icon,.save{background:#168575}.caption,.status,.crumb,.control{background:#fffffff2}.map-name{pointer-events:none;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-weight:500;fill:#365b55;paint-order:stroke;stroke:#ffffffdf;stroke-linejoin:round;letter-spacing:.04em}.field input,.field textarea{font-size:16px}.field label{font-size:14px}.row b{font-size:15px}.foot,.hint{font-size:12px}.control{min-width:44px;min-height:44px}.map-footer{font-size:12px}.map-name,.region,.world-bg{outline:none}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head>
-<body><div class="app"><aside class="rail"><header class="brand"><div class="brand-icon" aria-hidden="true">♡</div><div><h1>我们的旅行地图</h1><p>一家人，一路上的小美好</p></div></header><p class="summary">走过的地方会在地图上亮起，<br>每个标记都收着一段共同的回忆。</p><div class="stats"><div class="stat"><b id="placeCount">0</b><span>点亮的地方</span></div><div class="stat"><b id="photoCount">0</b><span>珍藏照片</span></div></div><div class="head"><span>我们的足迹</span><span class="badge" id="listTag">等待第一段旅程</span></div><div class="list" id="placeList"><div class="empty">🌱 给回忆留一个位置<br>在地图上选择去过的区域，<br>保存旅行故事，它就会亮起来。</div></div><footer class="foot">本设备保存 · 照片和记录不会上传到网站<br>全家跨设备同步需要另接共享数据服务。</footer></aside><main class="map-shell"><svg class="map" id="map" viewBox="0 0 1000 500" role="application" tabindex="0" aria-label="可拖动缩放并选择地区的旅行地图"><g id="shapes"></g><g id="markers"></g></svg><div class="map-top"><div class="caption"><b id="mapTitle">世界旅行地图</b><small id="mapHelp">点选国家 · 拖动 · 滚轮或双指缩放</small></div><form class="search" id="searchForm"><input id="searchInput" placeholder="搜索已载入的地区" aria-label="搜索已载入的地区"><button type="submit">查找</button></form><div class="status" id="status">正在准备地图…</div></div><nav class="crumb" id="crumb" hidden aria-label="地图层级"></nav><div class="controls"><button class="control" id="zoomIn" aria-label="放大地图">＋</button><button class="control" id="zoomOut" aria-label="缩小地图">−</button><button class="control" id="backWorld" aria-label="返回世界地图">⌂</button></div><footer class="map-footer">黄色区域 = 已记录 · 地图数据：<a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener noreferrer">Natural Earth</a></footer><section class="detail" id="detail" hidden aria-label="旅行记录编辑"><button class="close" id="closeDetail" aria-label="关闭">×</button><h2 id="detailName"></h2><div class="sub" id="detailSub"></div><div class="field"><label for="date">旅行日期</label><input id="date" type="date"></div><div class="field"><label for="intro">地区简介</label><textarea id="intro" placeholder="这里有什么特别之处？"></textarea></div><div class="field"><label for="memory">旅行回忆</label><textarea id="memory" placeholder="记下这一趟的故事…"></textarea></div><div class="field"><label for="photoFiles">旅行照片（可多选）</label><input id="photoFiles" type="file" accept="image/*" multiple><div class="photos" id="photos"></div><div class="hint">照片保存在这台设备的浏览器中，不会公开到网站。建议单张不超过 8 MB。</div></div><div class="actions"><button class="save" id="save">保存并点亮</button><button class="delete" id="delete" hidden>删除记录</button></div></section><div id="toast" class="toast" role="status"></div></main></div>
-<dialog id="errorDialog"><h2>地图暂时没能载入</h2><p id="errorText">请检查网络连接后刷新。</p><button class="save" id="closeError">知道了</button></dialog>
-<script>
-(()=>{'use strict';
-const $=id=>document.getElementById(id), svgNS='http://www.w3.org/2000/svg', map=$('map'), shapes=$('shapes'), dbName='family-travel-map-v2';
-const view={x:0,y:0,w:1000,h:500}, state={level:'world',trail:[],features:[],selected:null,records:new Map(),photoDraft:[],pendingFiles:[],dataSource:null};
-const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let animationFrame=0,labelFrame=0;
-function drawView(){map.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(updateNames)}
-function animateView(target){cancelAnimationFrame(animationFrame);if(matchMedia('(prefers-reduced-motion: reduce)').matches){Object.assign(view,target);drawView();return}const start={...view},time=performance.now();function frame(now){const t=Math.min(1,(now-time)/1100),ease=1-(1-t)**3;for(const key of ['x','y','w','h'])view[key]=start[key]+(target[key]-start[key])*ease;drawView();if(t<1)animationFrame=requestAnimationFrame(frame)}animationFrame=requestAnimationFrame(frame)}
-const labelGroup=document.createElementNS(svgNS,'g');labelGroup.setAttribute('aria-hidden','true');map.append(labelGroup);
-function updateNames(){labelGroup.replaceChildren();const scale=map.getScreenCTM()?.a;if(!scale)return;const boxes=[];for(const path of shapes.querySelectorAll('path')){const b=path.getBBox(),name=path.getAttribute('aria-label');if(!name)continue;const w=b.width*scale,h=b.height*scale,font=Math.min(18,Math.max(9,8+Math.sqrt(Math.min(w,h))/2)),textWidth=[...name].reduce((n,c)=>n+(c.charCodeAt(0)>255?font:font*.56),8);if(Math.min(w,h)<14||textWidth>w*1.3||font*1.5>h*1.3)continue;if(!path.labelPoint){let point=new DOMPoint(b.x+b.width/2,b.y+b.height/2);if(!path.isPointInFill(point)){let best=null,d=Infinity;for(let y=1;y<12;y++)for(let x=1;x<12;x++){const p=new DOMPoint(b.x+b.width*x/12,b.y+b.height*y/12),dist=(p.x-point.x)**2+(p.y-point.y)**2;if(dist<d&&path.isPointInFill(p)){best=p;d=dist}}if(best)point=best}path.labelPoint=point}const point=path.labelPoint,s=point.matrixTransform(map.getScreenCTM()),box={x:s.x-textWidth/2,y:s.y-font*.75,w:textWidth,h:font*1.5+4};if(boxes.some(a=>box.x<a.x+a.w&&box.x+box.w>a.x&&box.y<a.y+a.h&&box.y+box.h>a.y))continue;boxes.push(box);const text=document.createElementNS(svgNS,'text');text.textContent=name;text.setAttribute('class','map-name');text.setAttribute('x',point.x);text.setAttribute('y',point.y);text.setAttribute('text-anchor','middle');text.setAttribute('dominant-baseline','central');text.setAttribute('font-size',font/scale);text.setAttribute('stroke-width',2/scale);labelGroup.append(text)}}
-new ResizeObserver(()=>drawView()).observe(map);
-const recordButton=document.createElement('button');recordButton.className='control';recordButton.textContent='✎';recordButton.title='记录选中的地区';recordButton.setAttribute('aria-label','记录选中的地区');recordButton.onclick=()=>state.selected?openEditor(state.records.get(state.selected.id)):toast('请先点选一个地区');document.querySelector('.controls').prepend(recordButton);
-function zoom(factor,anchor){cancelAnimationFrame(animationFrame);let old=view.w,width=Math.max(8,Math.min(1500,old*factor));factor=width/old;let p=anchor||{x:view.x+view.w/2,y:view.y+view.h/2};view.x=p.x-(p.x-view.x)*factor;view.y=p.y-(p.y-view.y)*factor;view.w=width;view.h*=factor;drawView()}
-function projection([lng,lat]){return [(lng+180)*1000/360,(90-lat)*500/180]}
-function pathForGeometry(g){let out='',pts=[];function ring(coords){for(let i=0;i<coords.length;i++){let p=projection(coords[i]);pts.push(p);out+=(i?'L':'M')+p[0].toFixed(2)+','+p[1].toFixed(2)}out+='Z'}if(g.type==='Polygon')g.coordinates.forEach(ring);else if(g.type==='MultiPolygon')g.coordinates.forEach(poly=>poly.forEach(ring));return{d:out,pts}}
-function bounds(features){let xs=[],ys=[];for(let f of features){if(!f.geometry)continue;let p=pathForGeometry(f.geometry).pts;for(let q of p){xs.push(q[0]);ys.push(q[1])}}if(!xs.length)return null;let x=Math.min(...xs),y=Math.min(...ys),w=Math.max(...xs)-x,h=Math.max(...ys)-y,pad=Math.max(w,h)*.09+3;return{x:x-pad,y:y-pad,w:w+pad*2,h:h+pad*2}}
-function fit(features){let b=bounds(features);if(!b&&features.length===1){const path=[...shapes.querySelectorAll('path')].find(p=>p.dataset.key===featureId(features[0]));if(path){const r=path.getBBox(),pad=Math.max(r.width,r.height)*.12+2;b={x:r.x-pad,y:r.y-pad,w:r.width+pad*2,h:r.height+pad*2}}}if(b)animateView(b)}
-function keyOf(f){let p=f.properties||{};return p._key||p.adcode||p.iso_3166_2||p.ADM0_A3||p.adm0_a3||p.name}
-function nameOf(f){let p=f.properties||{};return p.name||p.NAME_ZH||p.NAME||p.ADMIN||p.admin||p.name_zh||p.NAME_EN||keyOf(f)}
-function addShape(f,klass='region'){if(!f.geometry&&!f.path)return;let path=document.createElementNS(svgNS,'path');path.setAttribute('d',f.path||pathForGeometry(f.geometry).d);path.setAttribute('class',klass);let key=String(keyOf(f));path.dataset.key=key;path.setAttribute('aria-label',nameOf(f));path.setAttribute('tabindex','0');path.setAttribute('role','button');if(state.records.has(key))path.classList.add('lit');path.addEventListener('click',()=>selectFeature(f));path.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectFeature(f)}});shapes.append(path);cancelAnimationFrame(labelFrame);labelFrame=requestAnimationFrame(updateNames)}
-function render(){shapes.replaceChildren();$('markers').replaceChildren();state.features.forEach(f=>addShape(f,state.level==='world'?'world-bg':'region'));for(let r of state.records.values()){if(r.lat!=null&&r.lng!=null&&r.level==='city'){let g=document.createElementNS(svgNS,'g');g.setAttribute('transform',`translate(${projection([r.lng,r.lat]).join(',')})`);g.innerHTML='<circle r="4.2" fill="#fff9d8" stroke="#a9751a" stroke-width="1.5"/><circle r="1.8" fill="#d79e22"/>';g.style.pointerEvents='none';$('markers').append(g)}}renderList();renderCrumb();$('mapTitle').textContent=state.trail.length?state.trail.at(-1).name:'世界旅行地图';$('mapHelp').textContent=state.level==='world'?'点选国家 · 拖动 · 滚轮或双指缩放':'选择区域记录旅行 · 点面包屑返回上层';$('status').textContent=state.level==='world'?'点亮你们去过的地方':`${state.features.length} 个地区`}
-function renderList(){let list=$('placeList');list.replaceChildren();$('placeCount').textContent=state.records.size;let photos=0;for(let r of state.records.values())photos+=r.photos?.length||0;$('photoCount').textContent=photos;$('listTag').textContent=state.records.size?`${state.records.size} 个足迹`:'等待第一段旅程';if(!state.records.size){let e=document.createElement('div');e.className='empty';e.textContent='🌱 给回忆留一个位置　在地图上选择去过的区域，保存旅行故事，它就会亮起来。';list.append(e);return}for(let r of [...state.records.values()].sort((a,b)=>(b.date||'').localeCompare(a.date||''))){let b=document.createElement('button');b.className='row';let title=document.createElement('b'),sub=document.createElement('span');title.textContent=r.name;sub.textContent=[r.date||'日期待补充',r.photos?.length?`${r.photos.length} 张照片`:null].filter(Boolean).join(' · ');b.append(title,sub);b.onclick=()=>openRecord(r);list.append(b)}}
-function renderCrumb(){let c=$('crumb');c.replaceChildren();c.hidden=!state.trail.length;state.trail.forEach((item,i)=>{if(i){let sep=document.createElement('span');sep.textContent='›';c.append(sep)}let b=document.createElement('button');b.textContent=item.name;b.onclick=()=>restoreLevel(i);c.append(b)})}
-async function initDB(){return new Promise((resolve,reject)=>{let req=indexedDB.open(dbName,1);req.onupgradeneeded=()=>req.result.createObjectStore('records',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-let db;async function readAll(){return new Promise((resolve,reject)=>{let req=db.transaction('records').objectStore('records').getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)})}async function putRecord(r){return new Promise((resolve,reject)=>{let tx=db.transaction('records','readwrite');tx.objectStore('records').put(r);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}async function removeRecord(id){return new Promise((resolve,reject)=>{let tx=db.transaction('records','readwrite');tx.objectStore('records').delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
-function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2400)}
-function featureId(f){return String(keyOf(f))}function selectFeature(f){let p=f.properties||{},level=state.level,id=featureId(f),name=nameOf(f);state.selected={id,name,level,parents:state.trail.map(x=>x.name).join(' · '),feature:f};$('detail').hidden=true;if(level==='world'&&id==='CHN'){loadChina(f);return}if(level==='world'&&(id==='USA'||id==='AUS')){loadStates(id,f);return}if((level==='province'||level==='city')&&p.childrenNum>0&&p.level!=='district'){loadChina(f);return}fit([f]);toast('已放大此地区，点右下角 ✎ 填写旅行记录')}
-async function loadGeo(url){let res=await fetch(url);if(!res.ok)throw Error(`地图数据加载失败（${res.status}）`);let d=await res.json();if(!Array.isArray(d.features))throw Error('地图数据格式无法识别');return d.features.filter(f=>f.geometry&&f.geometry.type&&f.properties)}
-async function loadChina(parent){let p=parent.properties||{},code=String(p.adcode||'100000'),name=nameOf(parent);try{toast('正在打开中国行政区…');let feats=await loadGeo(`https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`);if(!feats.length)throw Error('这个地区暂时没有下一级边界数据');let first=feats.find(f=>f.properties.level);let level=first?.properties.level||'district';state.trail.push({name,returnLevel:state.level,returnFeatures:state.features,returnView:{...view}});state.level=level==='province'?'province':level==='city'?'city':'district';state.features=feats.map(f=>({...f,properties:{...f.properties,_key:String(f.properties.adcode)}}));$('mapTitle').textContent=name;fit(state.features);render();toast('可继续点选省、市或区县')}catch(e){if(state.level==='world'&&String(p.ADM0_A3||p._key)==='CHN'){toast('行政区接口暂不可用，正在改用内置省级边界…');await loadStates('CHN',parent);return}showError(e.message+'。请稍后再试。')}}
-async function loadStates(country,parent){try{toast('正在载入州／省地图…');let data=await loadGeo('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_1_states_provinces.geojson');let code=country==='USA'?'US-':country==='CHN'?'CN-':'AU-';let feats=data.filter(f=>{let p=f.properties||{},iso=String(p.iso_3166_2||'');return iso.startsWith(code)&&!iso.includes('~')&&!iso.endsWith('X02')});if(country==='AUS')feats=feats.filter(f=>['AU-NSW','AU-QLD','AU-SA','AU-TAS','AU-VIC','AU-WA','AU-NT','AU-ACT'].includes(f.properties.iso_3166_2));if(country==='CHN'){const names={Anhui:'安徽',Beijing:'北京',Chongqing:'重庆',Fujian:'福建',Gansu:'甘肃',Guangdong:'广东',Guangxi:'广西',Guizhou:'贵州',Hainan:'海南',Hebei:'河北',Heilongjiang:'黑龙江',Henan:'河南',Hubei:'湖北',Hunan:'湖南',Jiangsu:'江苏',Jiangxi:'江西',Jilin:'吉林',Liaoning:'辽宁','Nei Mongol':'内蒙古','Inner Mongol':'内蒙古',Ningxia:'宁夏',Qinghai:'青海',Shaanxi:'陕西',Shandong:'山东',Shanghai:'上海',Shanxi:'山西',Sichuan:'四川',Tianjin:'天津',Tibet:'西藏',Xizang:'西藏',Xinjiang:'新疆',Yunnan:'云南',Zhejiang:'浙江'};feats=feats.map(f=>({...f,properties:{...f.properties,name:names[f.properties.name]||f.properties.name}}))}feats=feats.map(f=>({...f,properties:{...f.properties,_key:f.properties.iso_3166_2,name:f.properties.name||f.properties.name_en||f.properties.NAME}}));if(!feats.length)throw Error('没有找到这个国家的一级行政区边界');state.trail.push({name:nameOf(parent),returnLevel:'world',returnFeatures:worldFeatures,returnView:{x:0,y:0,w:1000,h:500}});state.level=country==='CHN'?'province':'state';state.features=feats;fit(feats);render();toast(country==='CHN'?'中国省级地图已载入':'点选州／省，填写旅行故事')}catch(e){showError('地区边界载入失败。请检查网络后再试。')}}
-function restoreLevel(i){let target=state.trail[i],next;if(!target){state.trail=[];state.level='world';state.features=worldFeatures;next={x:0,y:0,w:1000,h:500}}else{state.trail=state.trail.slice(0,i);state.level=target.returnLevel;state.features=target.returnFeatures;next=target.returnView}state.selected=null;$('detail').hidden=true;render();animateView(next)}
-function openEditor(r){let s=state.selected;if(!s)return;state.photoDraft=(r?.photos||[]).map(p=>({...p}));state.pendingFiles=[];$('detailName').textContent=r?.name||s.name;$('detailSub').textContent=[s.parents||'',s.level==='district'?'中国区县':s.level==='state'?'州／省':s.level==='country'?'国家':s.level==='city'?'城市':'地区'].filter(Boolean).join(' · ');$('date').value=r?.date||'';$('intro').value=r?.intro||'';$('memory').value=r?.memory||'';$('delete').hidden=!r;$('detail').hidden=false;renderPhotos()}
-function openRecord(r){state.selected={id:r.id,name:r.name,level:r.level,parents:r.parents||'',feature:null};openEditor(r)}function renderPhotos(){let box=$('photos');box.replaceChildren();state.photoDraft.forEach((p,i)=>{let wrap=document.createElement('div');wrap.className='photo';let img=document.createElement('img');img.src=URL.createObjectURL(p.blob);img.alt=`旅行照片 ${i+1}`;let del=document.createElement('button');del.type='button';del.textContent='×';del.setAttribute('aria-label','移除此照片');del.onclick=()=>{state.photoDraft.splice(i,1);renderPhotos()};wrap.append(img,del);box.append(wrap)})}
-$('photoFiles').onchange=e=>{for(let f of e.target.files){if(!f.type.startsWith('image/'))continue;if(f.size>8*1024*1024){toast('单张照片请控制在 8 MB 以内');continue}state.photoDraft.push({name:f.name,type:f.type,blob:f})}e.target.value='';renderPhotos()};$('save').onclick=async()=>{let s=state.selected;if(!s)return;try{let r={id:s.id,name:s.name,level:s.level,parents:s.parents,date:$('date').value,intro:$('intro').value.trim(),memory:$('memory').value.trim(),photos:state.photoDraft,lat:s.feature?.properties?.latitude||s.feature?.properties?.lat||null,lng:s.feature?.properties?.longitude||s.feature?.properties?.lon||null};await putRecord(r);state.records.set(r.id,r);$('detail').hidden=true;render();toast('保存好了，这个地方亮起来了 ✨')}catch(e){toast('保存失败：浏览器存储空间可能不足')}};$('delete').onclick=async()=>{let id=state.selected?.id;if(!id)return;if(!confirm('删除这条旅行记录和它的照片？此操作无法撤销。'))return;await removeRecord(id);state.records.delete(id);$('detail').hidden=true;render();toast('记录已删除，区域熄灭了')};$('closeDetail').onclick=()=>$('detail').hidden=true;
-function showError(s){$('errorText').textContent=s;$('errorDialog').showModal()}$('closeError').onclick=()=>$('errorDialog').close();
-let worldFeatures=[];async function initWorld(){try{let response=await fetch('./world.svg');if(!response.ok)throw Error('世界地图没有载入');let doc=new DOMParser().parseFromString(await response.text(),'image/svg+xml');let src=[...doc.querySelectorAll('path')];if(!src.length)throw Error('世界地图数据为空');worldFeatures=src.map(p=>({type:'Feature',properties:{_key:p.dataset.country||p.id,name:p.dataset.name||p.getAttribute('aria-label')||p.dataset.country||p.id},geometry:null,path:p.getAttribute('d')}));shapes.replaceChildren();for(let f of worldFeatures){let path=document.createElementNS(svgNS,'path');path.setAttribute('d',f.path);path.setAttribute('class','world-bg');path.dataset.key=featureId(f);path.setAttribute('tabindex','0');path.setAttribute('role','button');path.setAttribute('aria-label',nameOf(f));if(state.records.has(featureId(f)))path.classList.add('lit');path.onclick=()=>selectFeature(f);path.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectFeature(f)}};shapes.append(path)}state.features=worldFeatures;renderList();renderCrumb();$('status').textContent='点选国家开始记录'}catch(e){showError('世界地图暂时没能载入。请检查网络后刷新。')}}
-function findLoaded(q){q=q.trim().toLocaleLowerCase();if(!q)return;let match=state.features.find(f=>nameOf(f).toLocaleLowerCase().includes(q)||featureId(f).toLocaleLowerCase()===q);if(!match){toast('没有找到已载入的地区；请先进入国家或省份');return}let el=[...shapes.querySelectorAll('[data-key]')].find(x=>x.dataset.key===featureId(match));if(el){el.focus();selectFeature(match)}}$('searchForm').onsubmit=e=>{e.preventDefault();findLoaded($('searchInput').value)};
-const ptrs=new Map();map.addEventListener('wheel',e=>{e.preventDefault();let p=new DOMPoint(e.clientX,e.clientY).matrixTransform(map.getScreenCTM().inverse());zoom(Math.exp(Math.max(-100,Math.min(100,e.deltaY))*.002),p)},{passive:false});map.addEventListener('pointerdown',e=>{if(e.target.closest('.world-bg,.region'))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});map.setPointerCapture(e.pointerId);map.classList.add('dragging')});map.addEventListener('pointermove',e=>{let old=ptrs.get(e.pointerId);if(!old)return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===2){let a=[...ptrs.values()],dist=v=>Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y);let before=[old,...a.filter(p=>p!==ptrs.get(e.pointerId))];if(dist(a)>0)zoom(dist(before)/dist(a))}else{let m=map.getScreenCTM();view.x-=(e.clientX-old.x)/m.a;view.y-=(e.clientY-old.y)/m.d;drawView()}});for(let t of ['pointerup','pointercancel','lostpointercapture'])map.addEventListener(t,e=>{ptrs.delete(e.pointerId);if(!ptrs.size)map.classList.remove('dragging')});$('zoomIn').onclick=()=>zoom(.75);$('zoomOut').onclick=()=>zoom(1/.75);$('backWorld').onclick=()=>restoreLevel(-1);map.onkeydown=e=>{if(e.key==='+'||e.key==='=')zoom(.75);if(e.key==='-')zoom(1/.75)};document.addEventListener('keydown',e=>{if(e.key==='Escape')$('detail').hidden=true});
-(async()=>{try{db=await initDB();for(let r of await readAll())state.records.set(r.id,r);await initWorld();render()}catch(e){showError('本机保存暂不可用。请使用新版 Chrome、Edge 或 Safari。')}})();
-})();
-</script></body></html>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f8f7"><meta name="description" content="把一家人走过的地方和照片，收藏在同一张地图上。">
+  <title>我们的旅行地图</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='16' fill='%231ca58e'/%3E%3Cpath d='M24 7c-8 0-14 6-14 14 0 10 14 21 14 21s14-11 14-21c0-8-6-14-14-14zm0 19a6 6 0 1 1 0-12 6 6 0 0 1 0 12z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./leaflet.css" crossorigin="">
+  <style>
+    :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#213b44;background:#f5f8f7;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}body{margin:0;min-width:320px;height:100dvh;overflow:hidden}button,input,textarea{font:inherit}button{cursor:pointer}.app{height:100dvh;display:grid;grid-template-columns:310px minmax(0,1fr);position:relative}.rail{background:#f8fbfa;border-right:1px solid #e5eeeb;display:flex;flex-direction:column;z-index:500;padding:25px 21px 18px;min-width:0}.brand{display:flex;align-items:center;gap:11px;margin:0 0 23px}.brand-mark{width:40px;height:40px;border-radius:14px;background:#1ca58e;display:grid;place-items:center;color:white;box-shadow:0 5px 14px #1ca58e33}.brand-mark svg{width:23px}.brand h1{font-size:18px;letter-spacing:-.4px;margin:0;font-weight:750}.brand p{color:#82969a;font-size:13px;margin:3px 0 0}.search-wrap{position:relative}.search{width:100%;height:46px;border:1px solid #dfe9e6;border-radius:14px;padding:0 14px 0 41px;background:white;outline:0;font-size:15px;color:#233d43}.search:focus{border-color:#46b9a3;box-shadow:0 0 0 3px #1ca58e18}.search-icon{position:absolute;left:14px;top:14px;color:#82969a}.search-results{position:absolute;top:51px;left:0;right:0;background:white;border:1px solid #e2ebe8;border-radius:14px;box-shadow:0 12px 28px #193e3a1a;z-index:1000;overflow:hidden;display:none}.search-results.show{display:block}.search-result{display:block;width:100%;border:0;background:white;text-align:left;padding:12px 14px;color:#29434a}.search-result:hover{background:#f1f8f6}.search-result strong{display:block;font-size:14px}.search-result span{display:block;font-size:12px;color:#82969a;margin-top:3px}.section-head{display:flex;align-items:center;justify-content:space-between;margin:25px 0 11px}.section-head h2{font-size:14px;margin:0;color:#486067;font-weight:700}.count{font-size:12px;color:#83979b;background:#eaf1ef;border-radius:99px;padding:3px 8px}.place-list{overflow:auto;flex:1;margin:0 -8px;padding:0 8px}.place-row{display:flex;gap:11px;align-items:center;width:100%;border:0;background:transparent;text-align:left;padding:10px;border-radius:13px;color:#2d474e}.place-row:hover,.place-row.active{background:#eaf5f2}.place-emoji{width:39px;height:39px;border-radius:12px;background:#ddf2ec;display:grid;place-items:center;font-size:20px;flex:none}.place-row strong{display:block;font-size:14px;line-height:1.3}.place-row small{display:block;color:#7d9195;font-size:12px;margin-top:4px}.empty-list{color:#809397;font-size:14px;line-height:1.65;padding:14px 10px}.rail-foot{border-top:1px solid #e6eeeb;padding:13px 3px 0;color:#8a9b9d;font-size:12px;line-height:1.5}.map-shell{position:relative;min-width:0;height:100dvh;background:#dce9e7}.map{width:100%;height:100%}.leaflet-container{background:#dce9e7;font:inherit}.leaflet-control-attribution{font-size:10px!important}.map-top{position:absolute;z-index:450;top:22px;left:23px;right:23px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}.map-caption,.map-actions{pointer-events:auto}.map-caption{background:#ffffffed;backdrop-filter:blur(12px);border:1px solid #e7eeec;border-radius:15px;padding:12px 15px;box-shadow:0 4px 18px #23453e12}.map-caption b{font-size:14px;display:block}.map-caption span{font-size:12px;color:#7b8e91;display:block;margin-top:4px}.map-actions{display:flex;gap:9px}.pill-btn,.icon-btn{border:1px solid #e0e9e6;background:#ffffffed;color:#345057;box-shadow:0 4px 18px #23453e12;border-radius:13px;height:44px;padding:0 14px;display:flex;gap:8px;align-items:center;font-size:14px;font-weight:650}.pill-btn:hover,.icon-btn:hover{background:white;transform:translateY(-1px)}.pill-btn.primary{background:#1ca58e;color:#fff;border-color:#1ca58e}.pill-btn.primary:hover{background:#158a77}.icon-btn{width:44px;padding:0;justify-content:center}.map-hint{position:absolute;z-index:400;left:50%;bottom:22px;transform:translateX(-50%);background:#fffefaed;border:1px solid #e7eeec;padding:10px 15px;border-radius:99px;color:#5c7378;font-size:13px;box-shadow:0 5px 20px #23453e14;white-space:nowrap}.pin{width:34px;height:42px;position:relative}.pin-core{position:absolute;top:0;left:3px;width:28px;height:28px;background:#ee7960;border:3px solid white;border-radius:50% 50% 50% 5px;transform:rotate(-45deg);box-shadow:0 3px 8px #24413d48}.pin-core:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:white;top:8px;left:8px}.leaflet-marker-icon.selected-pin .pin-core{background:#158e7d;transform:rotate(-45deg) scale(1.12)}.panel{position:absolute;right:20px;top:20px;bottom:20px;width:min(390px,calc(100% - 40px));z-index:600;background:#fff;border:1px solid #e6eeeb;border-radius:22px;box-shadow:0 18px 50px #123b3533;display:flex;flex-direction:column;overflow:hidden;transform:translateX(calc(100% + 30px));transition:transform .28s cubic-bezier(.2,.75,.25,1)}.panel.open{transform:translateX(0)}.panel-head{padding:20px 20px 16px;border-bottom:1px solid #edf1ef;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.eyebrow{font-size:11px;letter-spacing:.08em;color:#1ca58e;font-weight:750}.panel-head h2{font-size:21px;margin:5px 0 0;line-height:1.2;overflow-wrap:anywhere}.panel-close{border:0;background:#f2f6f5;width:34px;height:34px;border-radius:11px;color:#5e7378;font-size:20px;flex:none}.panel-body{padding:18px 20px 26px;overflow:auto;flex:1}.field{margin-bottom:15px}.field label,.photo-head{display:block;color:#51686d;font-size:13px;font-weight:700;margin-bottom:7px}.field input,.field textarea{width:100%;border:1px solid #dfe8e5;border-radius:11px;padding:11px 12px;color:#29434a;background:#fbfdfc;font-size:15px;outline:none}.field input:focus,.field textarea:focus{border-color:#47b8a2;box-shadow:0 0 0 3px #1ca58e16}.field textarea{resize:vertical;min-height:72px;line-height:1.55}.field textarea.story{min-height:104px}.photo-head{display:flex;justify-content:space-between;align-items:center}.photo-head span{color:#849699;font-size:12px;font-weight:500}.photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.photo-card{position:relative;aspect-ratio:1.2;border-radius:12px;overflow:hidden;background:#eaf2ef}.photo-card img{width:100%;height:100%;object-fit:cover;display:block}.photo-remove{position:absolute;top:6px;right:6px;border:0;background:#193c39d9;color:white;border-radius:50%;width:28px;height:28px;font-size:17px;line-height:1}.add-photo{aspect-ratio:1.2;border:1px dashed #a9c9c0;background:#f4faf8;border-radius:12px;color:#277d70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:650}.add-photo:hover{background:#eaf7f3}.add-photo span:first-child{font-size:23px;font-weight:400}.panel-actions{display:flex;gap:8px;margin-top:19px}.save-btn,.delete-btn{height:43px;border-radius:12px;border:0;padding:0 15px;font-weight:700;font-size:14px}.save-btn{background:#1ca58e;color:#fff;flex:1}.save-btn:hover{background:#158a77}.delete-btn{background:#fff2ef;color:#b65241}.delete-btn:hover{background:#fee3dc}.toast{position:fixed;z-index:2000;bottom:23px;left:50%;transform:translate(-50%,14px);background:#1d4644;color:white;padding:11px 16px;border-radius:12px;font-size:14px;box-shadow:0 8px 30px #143b3a40;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}.modal-backdrop{position:fixed;inset:0;background:#16363378;z-index:1200;display:none;place-items:center;padding:18px}.modal-backdrop.show{display:grid}.modal{background:white;width:min(430px,100%);border-radius:20px;padding:23px;box-shadow:0 20px 60px #112f2c45}.modal h2{font-size:20px;margin:0}.modal p{color:#75898c;font-size:14px;line-height:1.55;margin:8px 0 18px}.modal .field{margin-bottom:13px}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.cancel-btn{border:1px solid #dfe8e5;background:white;color:#52696e;border-radius:11px;padding:0 15px;height:42px}.toast.error{background:#a5473d}.leaflet-popup-content-wrapper{border-radius:13px}.leaflet-popup-content{font-size:14px;margin:12px 15px}.leaflet-popup-content b{font-size:15px}.leaflet-popup-content span{color:#768b8e;font-size:12px}
+    @media(max-width:760px){.app{grid-template-columns:1fr;grid-template-rows:1fr}.rail{position:absolute;left:10px;right:10px;top:10px;padding:10px 12px;border:1px solid #e5eeeb;border-radius:17px;box-shadow:0 5px 22px #23453e18;background:#ffffffed;backdrop-filter:blur(12px);height:auto;max-height:45dvh}.brand{margin:0 0 9px}.brand-mark{width:34px;height:34px;border-radius:12px}.brand h1{font-size:16px}.brand p{font-size:12px}.section-head{margin:10px 0 3px}.place-list{max-height:100px}.rail-foot{display:none}.map-shell{height:100dvh}.map-top{top:auto;bottom:70px;left:12px;right:12px;align-items:flex-end}.map-caption{display:none}.map-actions{margin-left:auto}.map-hint{bottom:17px;font-size:12px;padding:9px 13px}.panel{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:min(74dvh,670px);border-radius:21px;transform:translateY(calc(100% + 18px));transition:transform .28s cubic-bezier(.2,.75,.25,1)}.panel.open{transform:translateY(0)}.panel-head{padding:16px 18px 13px}.panel-body{padding:15px 18px 24px}.panel-head h2{font-size:19px}}
+    @media(max-width:390px){.pill-btn{padding:0 11px;font-size:13px}.icon-btn,.pill-btn{height:41px}.icon-btn{width:41px}.rail{max-height:43dvh}}
+  </style>
+  <style>
+    .leaflet-interactive.region-lit{filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #c18426) drop-shadow(0 0 5px #f0be58)}
+    .region-label{background:transparent;border:0;box-shadow:none;color:#234b43;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-size:16px;font-weight:600;letter-spacing:.04em;text-shadow:0 1px 2px #fff,0 0 5px #ffffffd9;pointer-events:none}.region-label:before{display:none}
+    .region-name{background:none;border:0;pointer-events:none}.region-name span{display:block;width:max-content;transform:translate(-50%,-50%);white-space:nowrap;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-size:13px;font-weight:500;letter-spacing:.04em;color:#365b55;text-shadow:0 1px 2px #fff,0 0 4px #ffffffed;line-height:1.5}
+    @media(max-width:760px){.region-name span{font-size:12px}.region-label{font-size:15px}}
+    :root{--accent:#168575;--ink:#193c43;--line:#deebe7;--shadow:0 8px 32px #163e3910;color:var(--ink)}
+    .app{grid-template-columns:300px minmax(0,1fr)}
+    .rail{background:#fff;padding:28px 22px 20px;border-color:var(--line)}
+    .brand{margin-bottom:28px}.brand h1{font-size:20px;letter-spacing:-.6px}.brand p{margin-top:6px}
+    .brand-mark{background:var(--accent);border-radius:13px;box-shadow:none}
+    .search{background:#f5f9f8;border-color:transparent;height:48px;border-radius:12px;font-size:16px}
+    .section-head{margin-top:28px}.section-head h2{font-size:14px}.count{background:#eaf6f1;color:#287965;padding:5px 9px}
+    .place-row{padding:12px 10px;margin:3px 0;transition:background .18s ease}.place-row strong{font-size:16px}.place-row small{margin-top:6px}
+    .place-emoji{background:#edf6f2;color:var(--accent);font-size:21px;border-radius:50%}
+    .empty-list{font-size:15px;border:1px dashed var(--line);border-radius:14px;margin-top:12px;padding:20px 15px;line-height:1.8}
+    .rail-foot{padding-top:17px;line-height:1.8}.map-shell,.leaflet-container{background:#eaf2f6}
+    .map-top{top:24px;left:26px;right:26px}.map-caption{background:#fffffff2;border:0;border-radius:12px;box-shadow:var(--shadow);padding:14px 18px}
+    .map-caption b{font-size:15px}.map-caption span{margin-top:6px}
+    .pill-btn,.icon-btn{box-shadow:var(--shadow);border-radius:12px;transition:background .18s ease,transform .18s ease;min-height:44px}
+    .pill-btn.primary,.save-btn{background:var(--accent);border-color:var(--accent)}
+    .map-hint{font-size:14px;background:#fffffff2;border:0;box-shadow:var(--shadow);max-width:calc(100% - 24px);white-space:normal;text-align:center;line-height:1.5}
+    .panel{border:0;box-shadow:0 14px 60px #143a3326;border-radius:20px;transition:transform .36s cubic-bezier(.22,1,.36,1)}
+    .panel-head{padding:24px 24px 18px}.panel-body{padding:20px 24px 26px}.eyebrow{color:var(--accent);font-size:12px}
+    .field label,.photo-head{font-size:14px}.field input,.field textarea{font-size:16px;background:#f8fbfa;border-color:var(--line);line-height:1.6}
+    .photo-card,.add-photo{border-radius:14px}.photo-card img{transition:transform .22s ease}.photo-card:hover img{transform:scale(1.035)}
+    .save-btn,.delete-btn,.cancel-btn{min-height:44px;font-size:14px}.modal{border-radius:20px;padding:26px}.modal p{font-size:15px}
+    button:focus-visible{outline:3px solid #69bbaa;outline-offset:3px}
+    .leaflet-bar{border:0!important;box-shadow:var(--shadow)!important;border-radius:12px!important;overflow:hidden}
+    .leaflet-bar a{width:40px!important;height:40px!important;line-height:40px!important;color:var(--ink)!important;border-color:var(--line)!important}
+    @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="rail" aria-label="旅行地点">
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.6 7-12A7 7 0 1 0 5 9c0 6.4 7 12 7 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" fill="currentColor"/></svg></div><div><h1>我们的旅行地图</h1><p>把一起走过的路，留在这里</p></div></div>
+      <div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" class="search" placeholder="搜索城市或地区" autocomplete="off" aria-label="搜索城市或地区"><div id="searchResults" class="search-results" role="listbox"></div></div>
+      <div class="section-head"><h2>旅行足迹</h2><span id="placeCount" class="count">0 个地点</span></div>
+      <div id="placeList" class="place-list"><div class="empty-list">还没有旅行足迹。<br>搜索一座城市，或在地图上点一下，收藏你们一起去过的地方。</div></div>
+      <div class="rail-foot">旅行记录保存在当前浏览器<br>刷新不丢失 · 暂不跨设备同步。</div>
+    </aside>
+    <section class="map-shell" aria-label="世界旅行地图"><div id="map" class="map"></div>
+      <div class="map-top"><div class="map-caption"><b>一家人的世界足迹</b><span id="mapCaption">每一枚标记，都是一段共同回忆</span></div><div class="map-actions"><button id="locateBtn" class="icon-btn" title="回到世界地图" aria-label="回到世界地图">◎</button><button id="addBtn" class="pill-btn primary"><span aria-hidden="true">＋</span> 添加地点</button></div></div>
+      <div class="map-hint">点地区平滑放大 · 点“添加地点”记录旅程</div>
+    </section>
+    <aside id="detailPanel" class="panel" aria-label="地点详情" aria-hidden="true"><div class="panel-head"><div><div class="eyebrow">FAMILY TRIP</div><h2 id="panelTitle">新地点</h2></div><button id="closePanel" class="panel-close" aria-label="关闭详情">×</button></div><div class="panel-body">
+      <div class="field"><label for="placeName">地点名称</label><input id="placeName" maxlength="80" placeholder="例如：京都"></div>
+      <div class="field"><label for="placeDate">旅行日期</label><input id="placeDate" type="date"></div>
+      <div class="field"><label for="placeIntro">地区简介</label><textarea id="placeIntro" maxlength="400" placeholder="这座城市有什么特别之处？"></textarea></div>
+      <div class="field"><label for="placeMemory">旅行回忆</label><textarea id="placeMemory" class="story" maxlength="3000" placeholder="写下那天的小事、喜欢的风景，或一句只有家人懂的话…"></textarea></div>
+      <div class="field"><div class="photo-head">旅行照片 <span id="photoCount">0 张</span></div><div id="photoGrid" class="photo-grid"></div><input id="photoInput" type="file" accept="image/*" multiple hidden></div>
+      <div class="panel-actions"><button id="savePlace" class="save-btn">保存地点</button><button id="deletePlace" class="delete-btn">删除</button></div>
+    </div></aside>
+  </main>
+  <div id="addModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><h2 id="modalTitle">添加旅行地点</h2><p id="modalCoords">在地图上选中的位置</p><div class="field"><label for="newName">地点名称</label><input id="newName" maxlength="80" placeholder="例如：东京"></div><div class="field"><label for="newDate">旅行日期（可稍后补充）</label><input id="newDate" type="date"></div><div class="modal-actions"><button id="cancelAdd" class="cancel-btn">取消</button><button id="confirmAdd" class="save-btn">添加地点</button></div></div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./leaflet.js" crossorigin=""></script>
+  <script src="./local-store.js"></script>
+  <script>(() => {
+  const $ = (s) => document.querySelector(s), dbName = "family-travel-map-v1";
+  let db, places = [], markers = /* @__PURE__ */ new Map(), selectedId = null, pendingPoint = null, toastTimer;
+  const map = L.map("map", { zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: true }).setView([24, 8], 2);
+  L.control.zoom({ position: "bottomright" }).addTo(map);
+  let mapMoving = false;
+  map.on("movestart", () => { mapMoving = true; });
+  map.on("moveend", () => { mapMoving = false; });
+  map.attributionControl.addAttribution('World boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>');
+  const baseRegionStyle = { color: "#9fc8bc", weight: 1, fillColor: "#d1ebe2", fillOpacity: 0.94 };
+  const litRegionStyle = { color: "#c18426", weight: 2, fillColor: "#d1ebe2", fillOpacity: 0.94 };
+  const motion = (duration = 1.2) => ({ duration, easeLinearity: 0.25, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches });
+  const visitCache = new WeakMap();
+  let visitSignature = "";
+  function pointInRing([x, y], ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function polygonContains(point, polygon) {
+    return !!polygon?.length && pointInRing(point, polygon[0]) && !polygon.slice(1).some((ring) => pointInRing(point, ring));
+  }
+  function geometryContainsPoint(point, geometry) {
+    if (geometry?.type === "Polygon") return polygonContains(point, geometry.coordinates);
+    if (geometry?.type === "MultiPolygon") return geometry.coordinates.some((polygon) => polygonContains(point, polygon));
+    return false;
+  }
+  function featureHasVisit(feature) {
+    const cached = visitCache.get(feature);
+    if (cached?.signature === visitSignature) return cached.lit;
+    const lit = places.some((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng) && geometryContainsPoint([Number(p.lng), Number(p.lat)], feature.geometry));
+    visitCache.set(feature, { signature: visitSignature, lit });
+    return lit;
+  }
+  function paintRegion(layer) {
+    const hidden = layer === hiddenCountry || layer === hiddenProvince;
+    const lit = featureHasVisit(layer.feature);
+    layer.setStyle({ ...(lit ? litRegionStyle : baseRegionStyle), opacity: hidden ? 0 : 1, fillOpacity: hidden ? 0 : 0.94 });
+    if (layer.getElement()) layer.getElement().style.pointerEvents = hidden ? "none" : "";
+    layer.getElement()?.classList.toggle("region-lit", lit);
+  }
+  function renderVisitedRegions() {
+    visitSignature = places.map((p) => `${p.id}:${p.lat}:${p.lng}`).sort().join("|");
+    countryLayer.eachLayer(paintRegion);
+    adminLayer.eachLayer(paintRegion);
+    cityLayer.eachLayer(paintRegion);
+    updateRegionNames();
+  }
+  let regionSelection = null, regionRevision = 0;
+  let hiddenCountry = null, hiddenProvince = null, regionLabel = null;
+  const nameLabels = L.layerGroup().addTo(map), namePoints = new WeakMap();
+  function nameMetrics(name, width, height) {
+    const font = Math.min(18, Math.max(9, 8 + Math.sqrt(Math.min(width, height)) / 2));
+    const textWidth = [...name].reduce((n, c) => n + (c.charCodeAt(0) > 255 ? font : font * 0.56), 8);
+    return { font, width: textWidth, height: font * 1.5, visible: Math.min(width, height) >= 14 && textWidth <= width * 1.3 && font * 1.5 <= height * 1.3 };
+  }
+  function regionNameMetrics(layer, name) {
+    const bounds = layer.getBounds(), nw = map.project(bounds.getNorthWest()), se = map.project(bounds.getSouthEast());
+    return nameMetrics(name, Math.abs(se.x - nw.x), Math.abs(se.y - nw.y));
+  }
+  function resizeRegionNames() {
+    nameLabels.eachLayer((marker) => {
+      const metrics = regionNameMetrics(marker.options.region, marker.options.regionName);
+      const el = marker.getElement();
+      if (el) { el.style.visibility = metrics.visible ? "visible" : "hidden"; el.querySelector("span").style.fontSize = `${metrics.font}px`; }
+    });
+    if (regionLabel && regionSelection) {
+      const el = regionLabel.getElement();
+      if (el) el.style.fontSize = `${regionNameMetrics(regionSelection.layer, regionSelection.name).font}px`;
+    }
+  }
+  function updateRegionNames() {
+    nameLabels.clearLayers();
+    const layers = adminLayer.getLayers().length ? [...adminLayer.getLayers(), ...cityLayer.getLayers()] : countryLayer.getLayers();
+    const boxes = [], size = map.getSize();
+    for (const layer of layers) {
+      if (layer === hiddenProvince) continue;
+      const p = layer.feature.properties;
+      const name = p.name || p.name_en || adminCountryNames[p.ADM0_A3] || p.NAME || p.ADMIN;
+      if (!name || (regionLabel && name === regionSelection?.name)) continue;
+      const metrics = regionNameMetrics(layer, name);
+      if (!metrics.visible) continue;
+      if (!namePoints.has(layer)) namePoints.set(layer, regionLabelPoint(layer, layer.getBounds().getCenter()));
+      const anchor = namePoints.get(layer), screen = map.latLngToContainerPoint(anchor);
+      const box = { left: screen.x - metrics.width / 2, right: screen.x + metrics.width / 2, top: screen.y - metrics.height / 2 - 3, bottom: screen.y + metrics.height / 2 + 3 };
+      if (box.right < 0 || box.left > size.x || box.bottom < 0 || box.top > size.y) continue;
+      if (boxes.some((b) => box.left < b.right && box.right > b.left && box.top < b.bottom && box.bottom > b.top)) continue;
+      boxes.push(box);
+      L.marker(anchor, { region: layer, regionName: name, interactive: false, keyboard: false, icon: L.divIcon({ className: "region-name", html: `<span style="font-size:${metrics.font}px;text-align:center">${esc(name)}</span>`, iconSize: [0, 0], iconAnchor: [0, 0] }) }).addTo(nameLabels);
+    }
+  }
+  function showChildNames() {
+    if (regionLabel) { map.removeLayer(regionLabel); regionLabel = null; }
+    updateRegionNames();
+  }
+  map.on("moveend", updateRegionNames);
+  map.on("zoom", resizeRegionNames);
+  function clearCities() {
+    cityLayer.clearLayers();
+    const previous = hiddenProvince;
+    hiddenProvince = null;
+    if (previous) paintRegion(previous);
+    updateRegionNames();
+  }
+  function restoreCountry() {
+    const previous = hiddenCountry;
+    hiddenCountry = null;
+    if (previous) paintRegion(previous);
+  }
+  function regionLabelPoint(layer, fallback) {
+    const bounds = layer.getBounds(), center = bounds.getCenter();
+    const inside = (p) => geometryContainsPoint([p.lng, p.lat], layer.feature.geometry);
+    if (inside(center)) return center;
+    let best = fallback, distance = Infinity;
+    for (let y = 1; y < 16; y++) for (let x = 1; x < 16; x++) {
+      const p = L.latLng(bounds.getSouth() + (bounds.getNorth() - bounds.getSouth()) * y / 16, bounds.getWest() + (bounds.getEast() - bounds.getWest()) * x / 16);
+      const d = (p.lat - center.lat) ** 2 + (p.lng - center.lng) ** 2;
+      if (d < distance && inside(p)) { best = p; distance = d; }
+    }
+    return best;
+  }
+  function zoomToRegion(layer, name, latlng, maxZoom = 9) {
+    const bounds = layer.getBounds();
+    if (!bounds.isValid()) return;
+    map.stop();
+    regionSelection = { name, latlng, layer };
+    if (regionLabel) map.removeLayer(regionLabel);
+    regionLabel = L.tooltip({ permanent: true, direction: "center", className: "region-label", opacity: 1 }).setLatLng(regionLabelPoint(layer, latlng)).setContent(esc(name)).addTo(map);
+    resizeRegionNames();
+    const mobile = window.innerWidth <= 760;
+    map.flyToBounds(bounds, {
+      paddingTopLeft: mobile ? [24, $(".rail").offsetHeight + 30] : [35, 90],
+      paddingBottomRight: mobile ? [24, 130] : [35, 80],
+      maxZoom, ...motion()
+    });
+    $("#mapCaption").textContent = `${name} · 探索这片足迹`;
+    $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
+  }
+  const countryLayer = L.geoJSON(null, { style: (feature) => featureHasVisit(feature) ? litRegionStyle : baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.4 }), mouseout: () => paintRegion(layer), click: (e) => {
+      L.DomEvent.stopPropagation(e);
+      const n = feature.properties?.NAME || feature.properties?.ADMIN || "";
+      const code = feature.properties?.ADM0_A3 || feature.properties?.ADM0_A3_EH;
+      const revision = ++regionRevision;
+      restoreCountry();
+      clearCities();
+      adminLayer.clearLayers();
+      zoomToRegion(layer, adminCountryNames[code] || n, e.latlng, 7);
+      updateRegionNames();
+      if (["CHN", "USA", "AUS"].includes(code)) {
+        showAdminRegions(code, revision, layer);
+        return;
+      }
+    } });
+    paintRegion(layer);
+  } }).addTo(map);
+  const adminLayer = L.geoJSON(null, { style: (feature) => featureHasVisit(feature) ? litRegionStyle : baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.6 }), mouseout: () => paintRegion(layer), click: (e) => {
+      L.DomEvent.stopPropagation(e);
+      const revision = ++regionRevision;
+      clearCities();
+      zoomToRegion(layer, feature.properties?.name || feature.properties?.name_en || "", e.latlng);
+      updateRegionNames();
+      if (feature.properties?.level === "province") showChinaCities(layer, revision);
+    } });
+    paintRegion(layer);
+  } }).addTo(map);
+  const cityLayer = L.geoJSON(null, { style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.4 }), mouseout: () => paintRegion(layer), click: (e) => {
+      L.DomEvent.stopPropagation(e);
+      ++regionRevision;
+      zoomToRegion(layer, feature.properties.name, e.latlng, 11);
+    } });
+    paintRegion(layer);
+  } }).addTo(map);
+  const chinaData = new Map();
+  function chinaBoundaries(code) {
+    if (!chinaData.has(code)) chinaData.set(code, api(`/api/regions/${code}`).catch((e) => { chinaData.delete(code); throw e; }));
+    return chinaData.get(code);
+  }
+  async function showChinaCities(province, revision) {
+    try {
+      notify("正在载入市级边界…");
+      const data = await chinaBoundaries(province.feature.properties.adcode);
+      if (revision !== regionRevision) return;
+      const features = data.features.filter((f) => f.properties?.name);
+      if (!features.length) throw Error("没有市级边界");
+      cityLayer.addData({ type: "FeatureCollection", features });
+      hiddenProvince = province;
+      renderVisitedRegions();
+      showChildNames();
+      $("#mapCaption").textContent = `${province.feature.properties.name} · 点击城市／区继续放大`;
+      notify("市／区地图已载入，点击地区可放大并记录旅行");
+    } catch {
+      if (revision === regionRevision) notify("此地区的市级边界暂不可用，仍可添加旅行地点", true);
+    }
+  }
+  let adminDataPromise = null;
+  const adminCountryNames = { CHN: "中国", USA: "美国", AUS: "澳大利亚" };
+  const chinaProvinceNames = { Anhui: "安徽", Beijing: "北京", Chongqing: "重庆", Fujian: "福建", Gansu: "甘肃", Guangdong: "广东", Guangxi: "广西", Guizhou: "贵州", Hainan: "海南", Hebei: "河北", Heilongjiang: "黑龙江", Henan: "河南", Hubei: "湖北", Hunan: "湖南", Jiangsu: "江苏", Jiangxi: "江西", Jilin: "吉林", Liaoning: "辽宁", "Inner Mongol": "内蒙古", "Nei Mongol": "内蒙古", Ningxia: "宁夏", Qinghai: "青海", Shaanxi: "陕西", Shandong: "山东", Shanghai: "上海", Shanxi: "山西", Sichuan: "四川", Tianjin: "天津", Tibet: "西藏", Xizang: "西藏", Xinjiang: "新疆", Yunnan: "云南", Zhejiang: "浙江" };
+  async function showAdminRegions(countryCode, revision, country) {
+    try {
+      notify("正在载入省／州地图…");
+      if (countryCode === "CHN") {
+        const data = await chinaBoundaries(100000);
+        if (revision !== regionRevision) return;
+        adminLayer.addData({ type: "FeatureCollection", features: data.features.filter((f) => f.properties?.name) });
+        hiddenCountry = country;
+        renderVisitedRegions();
+        showChildNames();
+        $("#mapCaption").textContent = "中国 · 点击省份查看市级地图";
+        notify("点击省份进入市级地图；直辖市按区展示");
+        return;
+      }
+      if (!adminDataPromise) adminDataPromise = fetch("./states.geojson").then((r) => {
+        if (!r.ok) throw Error("地区边界暂不可用");
+        return r.json();
+      }).catch((e) => { adminDataPromise = null; throw e; });
+      const data = await adminDataPromise;
+      if (revision !== regionRevision) return;
+      let features = data.features.filter((f) => {
+        const code = String(f.properties?.iso_3166_2 || "");
+        if (countryCode === "CHN") return code.startsWith("CN-");
+        if (countryCode === "USA") return code.startsWith("US-") && !["US-PR", "US-GU", "US-VI", "US-MP", "US-AS", "US-UM"].includes(code);
+        return ["AU-NSW", "AU-QLD", "AU-SA", "AU-TAS", "AU-VIC", "AU-WA", "AU-NT", "AU-ACT"].includes(code);
+      });
+      if (countryCode === "CHN") features = features.map((f) => ({ ...f, properties: { ...f.properties, name: chinaProvinceNames[f.properties?.name] || f.properties?.name } }));
+      if (!features.length) throw Error("没有找到省／州边界");
+      adminLayer.clearLayers();
+      adminLayer.addData({ type: "FeatureCollection", features });
+      hiddenCountry = country;
+      renderVisitedRegions();
+      showChildNames();
+      $("#mapCaption").textContent = `${adminCountryNames[countryCode]} · 点击省／州继续放大`;
+      $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
+      notify("省／州地图已载入，已记录的地区会亮起");
+    } catch (e) {
+      notify("省／州边界暂时无法载入，请检查网络后重试", true);
+    }
+  }
+  function returnToWorld() {
+    ++regionRevision;
+    regionSelection = null;
+    restoreCountry();
+    clearCities();
+    if (regionLabel) { map.removeLayer(regionLabel); regionLabel = null; }
+    map.stop();
+    adminLayer.clearLayers();
+    updateRegionNames();
+    $("#mapCaption").textContent = "每一枚标记，都是一段共同回忆";
+    $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
+    map.flyTo([24, 8], 2, motion());
+  }
+  fetch("world.geojson").then((r) => {
+    if (!r.ok) throw Error("Map data unavailable");
+    return r.json();
+  }).then((data) => { countryLayer.addData(data); updateRegionNames(); }).catch(() => notify("\u4E16\u754C\u8F6E\u5ED3\u52A0\u8F7D\u5931\u8D25\uFF0C\u53EF\u5237\u65B0\u9875\u9762\u91CD\u8BD5", true));
+  function openDb() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(dbName, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore("places", { keyPath: "id" });
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function localPlaces() {
+    return new Promise((resolve, reject) => {
+      const req = db.transaction("places").objectStore("places").getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function api(path, options = {}) { return localApi(path, options); }
+  function allPlaces() {
+    return api("/api/places");
+  }
+  function saveRecord(p) {
+    const { photos, ...place } = p;
+    return api("/api/places", { method: "PUT", body: JSON.stringify(place) });
+  }
+  function deleteRecord(id2) {
+    return api("/api/places/" + encodeURIComponent(id2), { method: "DELETE" });
+  }
+  const id = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  function notify(message, error = false) {
+    const el = $("#toast");
+    el.textContent = message;
+    el.classList.toggle("error", error);
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  }
+  function esc(s = "") {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  }
+  function markerIcon(active = false) {
+    return L.divIcon({ className: active ? "selected-pin" : "", html: '<span class="pin"><span class="pin-core"></span></span>', iconSize: [34, 42], iconAnchor: [17, 39] });
+  }
+  function dateLabel(s) {
+    if (!s) return "\u65E5\u671F\u5F85\u8865\u5145";
+    const d = /* @__PURE__ */ new Date(s + "T00:00:00");
+    return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric" }).format(d);
+  }
+  function render() {
+    places.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    renderVisitedRegions();
+    $("#placeCount").textContent = places.length + " \u4E2A\u5730\u70B9";
+    if (!regionSelection) $("#mapCaption").textContent = places.length ? `已经收藏 ${places.length} 段家庭旅行` : "每一枚标记，都是一段共同回忆";
+    $("#placeList").innerHTML = places.length ? places.map((p) => `<button class="place-row ${p.id === selectedId ? "active" : ""}" data-id="${esc(p.id)}"><span class="place-emoji">\u{1F4CD}</span><span><strong>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</strong><small>${esc(dateLabel(p.date))}</small></span></button>`).join("") : '<div class="empty-list">\u8FD8\u6CA1\u6709\u65C5\u884C\u8DB3\u8FF9\u3002<br>\u641C\u7D22\u4E00\u5EA7\u57CE\u5E02\uFF0C\u6216\u5728\u5730\u56FE\u4E0A\u70B9\u4E00\u4E0B\uFF0C\u6536\u85CF\u4F60\u4EEC\u4E00\u8D77\u53BB\u8FC7\u7684\u5730\u65B9\u3002</div>';
+    places.forEach((p) => {
+      if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return;
+      let m = markers.get(p.id);
+      if (!m) {
+        m = L.marker([p.lat, p.lng], { icon: markerIcon(p.id === selectedId) }).addTo(map).on("click", () => selectPlace(p.id));
+        markers.set(p.id, m);
+      } else {
+        if (!m.getLatLng().equals([p.lat, p.lng])) m.setLatLng([p.lat, p.lng]);
+        if (m.options.icon.options.className !== (p.id === selectedId ? "selected-pin" : "")) m.setIcon(markerIcon(p.id === selectedId));
+      }
+      m.bindPopup(`<b>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</b><br><span>${esc(dateLabel(p.date))}</span>`);
+    });
+    for (const [key, m] of markers) if (!places.some((p) => p.id === key)) {
+      map.removeLayer(m);
+      markers.delete(key);
+    }
+    if (selectedId) {
+      const p = places.find((x) => x.id === selectedId);
+      if (p) fillPanel(p);
+    }
+  }
+  function fillPanel(p) {
+    $("#placeName").value = p.name || "";
+    $("#placeDate").value = p.date || "";
+    $("#placeIntro").value = p.intro || "";
+    $("#placeMemory").value = p.memory || "";
+    $("#photoCount").textContent = (p.photos || []).length + " \u5F20";
+    $("#photoGrid").innerHTML = (p.photos || []).map((photo, i) => {
+      const src = typeof photo === "string" ? photo : photo.url;
+      return `<div class="photo-card"><img src="${esc(src)}" alt="${esc(p.name || "\u65C5\u884C")}\u7167\u7247 ${i + 1}" loading="lazy"><button class="photo-remove" data-photo="${i}" aria-label="\u5220\u9664\u8FD9\u5F20\u7167\u7247">\xD7</button></div>`;
+    }).join("") + '<button class="add-photo" id="addPhoto"><span>\uFF0B</span><span>\u6DFB\u52A0\u7167\u7247</span></button>';
+    $("#panelTitle").textContent = p.name || "\u672A\u547D\u540D\u5730\u70B9";
+    $("#deletePlace").style.display = p.id === "draft" ? "none" : "block";
+  }
+  function openPanel() {
+    const el = $("#detailPanel");
+    el.classList.add("open");
+    el.setAttribute("aria-hidden", "false");
+  }
+  function closePanel() {
+    const el = $("#detailPanel");
+    el.classList.remove("open");
+    el.setAttribute("aria-hidden", "true");
+    selectedId = null;
+    render();
+  }
+  function selectPlace(placeId) {
+    selectedId = placeId;
+    render();
+    openPanel();
+    const p = places.find((x) => x.id === placeId);
+    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) map.panTo([p.lat, p.lng], { animate: true, duration: 0.45 });
+  }
+  function askAdd(latlng, name = "") {
+    pendingPoint = { lat: latlng.lat, lng: latlng.lng };
+    $("#modalCoords").textContent = `\u4F4D\u7F6E ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+    $("#newName").value = name;
+    $("#newDate").value = "";
+    $("#addModal").classList.add("show");
+    setTimeout(() => $("#newName").focus(), 80);
+  }
+  map.on("click", (e) => askAdd(e.latlng));
+  $("#addBtn").onclick = () => askAdd(regionSelection?.latlng || map.getCenter(), regionSelection?.name || "");
+  $("#locateBtn").onclick = returnToWorld;
+  $("#closePanel").onclick = closePanel;
+  $("#cancelAdd").onclick = () => $("#addModal").classList.remove("show");
+  $("#addModal").onclick = (e) => {
+    if (e.target === $("#addModal")) $("#addModal").classList.remove("show");
+  };
+  $("#confirmAdd").onclick = async () => {
+    const name = $("#newName").value.trim();
+    if (!name) {
+      $("#newName").focus();
+      return;
+    }
+    const p = { id: id(), name, date: $("#newDate").value, lat: pendingPoint.lat, lng: pendingPoint.lng, intro: "", memory: "", photos: [], createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+    try {
+      await saveRecord(p);
+      places.push(p);
+      $("#addModal").classList.remove("show");
+      render();
+      selectPlace(p.id);
+      notify("\u5730\u70B9\u5DF2\u6DFB\u52A0\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u70B9\u4EAE \u2728");
+    } catch (e) {
+      notify("\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
+    }
+  };
+  $("#placeList").onclick = (e) => {
+    const b = e.target.closest("[data-id]");
+    if (b) selectPlace(b.dataset.id);
+  };
+  $("#savePlace").onclick = async () => {
+    const p = places.find((x) => x.id === selectedId);
+    if (!p) return;
+    p.name = $("#placeName").value.trim() || "\u672A\u547D\u540D\u5730\u70B9";
+    p.date = $("#placeDate").value;
+    p.intro = $("#placeIntro").value.trim();
+    p.memory = $("#placeMemory").value.trim();
+    try {
+      await saveRecord(p);
+      render();
+      notify("\u65C5\u884C\u8BB0\u5F55\u5DF2\u4FDD\u5B58\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u70B9\u4EAE \u2728");
+    } catch (e) {
+      notify("\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
+    }
+  };
+  $("#deletePlace").onclick = async () => {
+    const p = places.find((x) => x.id === selectedId);
+    if (!p) return;
+    if (!confirm(`\u5220\u9664\u201C${p.name}\u201D\u53CA\u5176 ${p.photos.length} \u5F20\u7167\u7247\uFF1F\u6B64\u64CD\u4F5C\u65E0\u6CD5\u64A4\u9500\u3002`)) return;
+    try {
+      await deleteRecord(p.id);
+      places = places.filter((x) => x.id !== p.id);
+      selectedId = null;
+      $("#detailPanel").classList.remove("open");
+      render();
+      notify("\u5730\u70B9\u53CA\u7167\u7247\u5DF2\u5220\u9664\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u7184\u706D");
+    } catch (e) {
+      notify("\u5220\u9664\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5", true);
+    }
+  };
+  $("#photoGrid").onclick = async (e) => {
+    if (e.target.closest("#addPhoto")) {
+      $("#photoInput").click();
+      return;
+    }
+    const b = e.target.closest("[data-photo]");
+    if (b) {
+      const p = places.find((x) => x.id === selectedId), photo = p?.photos?.[Number(b.dataset.photo)];
+      if (!p || !photo) return;
+      try {
+        await api(`/api/photos/${encodeURIComponent(p.id)}/${encodeURIComponent(photo.id)}`, { method: "DELETE" });
+        p.photos.splice(Number(b.dataset.photo), 1);
+        fillPanel(p);
+        notify("\u7167\u7247\u5DF2\u5220\u9664");
+      } catch {
+        notify("\u5220\u9664\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5", true);
+      }
+    }
+  };
+  $("#photoInput").onchange = async (e) => {
+    const files = [...e.target.files];
+    const p = places.find((x) => x.id === selectedId);
+    if (!p || !files.length) return;
+    const allowed = files.filter((f) => f.type.startsWith("image/"));
+    if (allowed.length !== files.length) notify("\u53EA\u652F\u6301\u6DFB\u52A0\u56FE\u7247\u6587\u4EF6", true);
+    try {
+      await saveRecord(p);
+      for (const f of allowed) {
+        const form = new FormData();
+        form.append("file", f);
+        await api(`/api/photos/${encodeURIComponent(p.id)}`, { method: "POST", body: form });
+      }
+      places = await allPlaces();
+      render();
+      fillPanel(places.find((x) => x.id === selectedId));
+      notify(`\u5DF2\u6DFB\u52A0 ${allowed.length} \u5F20\u7167\u7247`);
+    } catch (err) {
+      notify("\u7167\u7247\u672A\u80FD\u4FDD\u5B58\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u540E\u91CD\u8BD5", true);
+    }
+    e.target.value = "";
+  };
+  setInterval(async () => {
+    if (selectedId || document.hidden || mapMoving) return;
+    try {
+      const latest = await allPlaces();
+      if (JSON.stringify(latest) !== JSON.stringify(places)) {
+        places = latest;
+        render();
+      }
+    } catch {
+    }
+  }, 15e3);
+  const cityIndex = [["\u5317\u4EAC", 39.9042, 116.4074, "beijing \u5317\u4EAC Beijing"], ["\u4E0A\u6D77", 31.2304, 121.4737, "shanghai \u4E0A\u6D77 Shanghai"], ["\u6210\u90FD", 30.5728, 104.0668, "chengdu \u6210\u90FD Chengdu"], ["\u676D\u5DDE", 30.2741, 120.1551, "hangzhou \u676D\u5DDE Hangzhou"], ["\u897F\u5B89", 34.3416, 108.9398, "xian \u897F\u5B89 Xi\u2019an"], ["\u9999\u6E2F", 22.3193, 114.1694, "hong kong \u9999\u6E2F Hong Kong"], ["\u4E1C\u4EAC", 35.6762, 139.6503, "tokyo \u4E1C\u4EAC Tokyo"], ["\u4EAC\u90FD", 35.0116, 135.7681, "kyoto \u4EAC\u90FD Kyoto"], ["\u5927\u962A", 34.6937, 135.5023, "osaka \u5927\u962A Osaka"], ["\u9996\u5C14", 37.5665, 126.978, "seoul \u9996\u5C14 Seoul"], ["\u65B0\u52A0\u5761", 1.3521, 103.8198, "singapore \u65B0\u52A0\u5761 Singapore"], ["\u66FC\u8C37", 13.7563, 100.5018, "bangkok \u66FC\u8C37 Bangkok"], ["\u5DF4\u9ECE", 48.8566, 2.3522, "paris \u5DF4\u9ECE Paris"], ["\u4F26\u6566", 51.5072, -0.1276, "london \u4F26\u6566 London"], ["\u7F57\u9A6C", 41.9028, 12.4964, "rome \u7F57\u9A6C Rome"], ["\u7EBD\u7EA6", 40.7128, -74.006, "new york \u7EBD\u7EA6 New York"], ["\u6D1B\u6749\u77F6", 34.0522, -118.2437, "los angeles \u6D1B\u6749\u77F6 Los Angeles"], ["\u65E7\u91D1\u5C71", 37.7749, -122.4194, "san francisco \u65E7\u91D1\u5C71 San Francisco"], ["\u6089\u5C3C", -33.8688, 151.2093, "sydney \u6089\u5C3C Sydney"], ["\u58A8\u5C14\u672C", -37.8136, 144.9631, "melbourne \u58A8\u5C14\u672C Melbourne"], ["\u6E29\u54E5\u534E", 49.2827, -123.1207, "vancouver \u6E29\u54E5\u534E Vancouver"], ["\u8FEA\u62DC", 25.2048, 55.2708, "dubai \u8FEA\u62DC Dubai"], ["\u4F0A\u65AF\u5766\u5E03\u5C14", 41.0082, 28.9784, "istanbul \u4F0A\u65AF\u5766\u5E03\u5C14 Istanbul"], ["\u4E09\u4E9A", 18.2528, 109.5119, "sanya \u4E09\u4E9A Sanya"]];
+  function showSearchResults(data, local = false) {
+    const box = $("#searchResults");
+    box.innerHTML = data.length ? `${local ? '<div class="search-result"><strong>\u7F51\u7EDC\u4E0D\u53EF\u7528 \xB7 \u5E38\u7528\u57CE\u5E02</strong><span>\u4ECD\u53EF\u641C\u7D22\u4E0B\u5217\u5E38\u89C1\u65C5\u884C\u76EE\u7684\u5730</span></div>' : ""}${data.map((r, i) => `<button class="search-result" data-result="${i}"><strong>${esc(r.name || r.display_name.split(",")[0])}</strong><span>${esc(r.display_name)}</span></button>`).join("")}` : '<div class="search-result"><strong>\u6CA1\u6709\u5339\u914D\u7684\u5730\u70B9</strong><span>\u8BD5\u8BD5\u82F1\u6587\u540D\uFF0C\u6216\u76F4\u63A5\u5728\u5730\u56FE\u4E0A\u70B9\u9009\u4F4D\u7F6E</span></div>';
+    box.dataset.items = JSON.stringify(data);
+    box.classList.add("show");
+  }
+  function showOfflineResults(q) {
+    const hits = cityIndex.filter((c) => c[3].toLowerCase().includes(q.toLowerCase())).slice(0, 6).map((c) => ({ name: c[0], lat: c[1], lon: c[2], display_name: `${c[0]} \xB7 \u5E38\u7528\u57CE\u5E02` }));
+    showSearchResults(hits, true);
+  }
+  let searchTimer;
+  $("#search").onfocus = () => {
+    if (selectedId) closePanel();
+  };
+  $("#search").oninput = () => {
+    clearTimeout(searchTimer);
+    const q = $("#search").value.trim(), box = $("#searchResults");
+    if (q.length < 2) {
+      box.classList.remove("show");
+      return;
+    }
+    box.innerHTML = '<div class="search-result"><strong>\u6B63\u5728\u641C\u7D22\u2026</strong></div>';
+    box.classList.add("show");
+    searchTimer = setTimeout(async () => {
+      showOfflineResults(q);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=zh-CN&q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(6e3) });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.length) showSearchResults(data);
+      } catch (e) {
+      }
+    }, 300);
+  };
+  $("#searchResults").onclick = (e) => {
+    const b = e.target.closest("[data-result]");
+    if (!b) return;
+    const r = JSON.parse($("#searchResults").dataset.items)[Number(b.dataset.result)];
+    const point = { lat: Number(r.lat), lng: Number(r.lon) }, name = r.name || r.display_name.split(",")[0];
+    $("#searchResults").classList.remove("show");
+    $("#search").value = name;
+    map.stop();
+    map.flyTo(point, Math.max(map.getZoom(), 9), motion());
+    askAdd(point, name);
+  };
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-wrap")) $("#searchResults").classList.remove("show");
+  });
+  $("#search").onkeydown = (e) => {
+    if (e.key === "Escape") $("#searchResults").classList.remove("show");
+    if (e.key === "Enter") $("#searchResults").querySelector("[data-result]")?.click();
+  };
+  const modelContext = document.modelContext;
+  if (modelContext?.registerTool) {
+    const lifecycle = new AbortController();
+    try {
+      Promise.resolve(modelContext.registerTool({ name: "list_family_travel_places", title: "List travel places", description: "Read the saved family trip locations shown on this map.", inputSchema: { type: "object", properties: {}, additionalProperties: false }, annotations: { readOnlyHint: true }, execute: async () => places.map((p) => ({ id: p.id, name: p.name, date: p.date, latitude: p.lat, longitude: p.lng, intro: p.intro, memory: p.memory, photoCount: p.photos.length })) }, { signal: lifecycle.signal })).catch(() => {
+      });
+      Promise.resolve(modelContext.registerTool({ name: "add_family_travel_place", title: "Add a travel place", description: "Save a family travel place to the map and open its details for editing.", inputSchema: { type: "object", properties: { name: { type: "string", minLength: 1, maxLength: 80 }, latitude: { type: "number", minimum: -90, maximum: 90 }, longitude: { type: "number", minimum: -180, maximum: 180 }, date: { type: "string", pattern: "^$|^\\d{4}-\\d{2}-\\d{2}$" } }, required: ["name", "latitude", "longitude"], additionalProperties: false }, annotations: { readOnlyHint: false }, execute: async (input) => {
+        if (typeof input.name !== "string" || !input.name.trim() || !Number.isFinite(input.latitude) || !Number.isFinite(input.longitude) || Math.abs(input.latitude) > 90 || Math.abs(input.longitude) > 180) throw new Error("\u8BF7\u63D0\u4F9B\u5730\u70B9\u540D\u79F0\u548C\u6709\u6548\u7684\u7ECF\u7EAC\u5EA6");
+        const p = { id: id(), name: input.name.trim(), date: input.date || "", lat: input.latitude, lng: input.longitude, intro: "", memory: "", photos: [], createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+        await saveRecord(p);
+        places.push(p);
+        render();
+        selectPlace(p.id);
+        return { id: p.id, name: p.name, date: p.date, latitude: p.lat, longitude: p.lng, saved: true };
+      } }, { signal: lifecycle.signal })).catch(() => {
+      });
+    } catch (e) {
+    }
+  }
+  (async () => {
+    try {
+      let local = [];
+      try {
+        db = await openDb();
+        local = await localPlaces();
+      } catch {
+        db = null;
+      }
+      places = await allPlaces();
+      let migrated = 0;
+      for (const old of local) {
+        let remote = places.find((x) => x.id === old.id);
+        if (!remote) {
+          const { photos = [], ...place } = old;
+          await saveRecord(place);
+          remote = { ...place, photos: [] };
+          places.push(remote);
+        }
+        const existing = new Set((remote.photos || []).map((x) => x.id));
+        for (let i = 0; i < (old.photos || []).length; i++) {
+          const photoId = `legacy-${i}`;
+          if (existing.has(photoId) || typeof old.photos[i] !== "string") continue;
+          const blob = await (await fetch(old.photos[i])).blob(), form = new FormData();
+          form.append("file", blob, `\u65C5\u884C\u7167\u7247-${i + 1}.jpg`);
+          await api(`/api/photos/${encodeURIComponent(old.id)}?photoId=${encodeURIComponent(photoId)}`, { method: "POST", body: form });
+          existing.add(photoId);
+          migrated++;
+        }
+      }
+      places = await allPlaces();
+      if (migrated) notify("已保留原有旅行记录");
+      render();
+    } catch (e) {
+      notify("本地数据暂时无法读取，请检查浏览器存储权限；原有记录仍保留", true);
+    }
+  })();
+})();</script>
+</body>
+</html>
