@@ -12,10 +12,15 @@
     @media(max-width:390px){.pill-btn{padding:0 11px;font-size:13px}.icon-btn,.pill-btn{height:41px}.icon-btn{width:41px}.rail{max-height:43dvh}}
   </style>
   <style>
-    .leaflet-interactive.region-lit{filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #c18426) drop-shadow(0 0 5px #f0be58)}
-    .region-label{background:transparent;border:0;box-shadow:none;color:#234b43;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-size:16px;font-weight:600;letter-spacing:.04em;text-shadow:0 1px 2px #fff,0 0 5px #ffffffd9;pointer-events:none}.region-label:before{display:none}
-    .region-name{background:none;border:0;pointer-events:none}.region-name span{display:block;width:max-content;transform:translate(-50%,-50%);white-space:nowrap;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-size:13px;font-weight:500;letter-spacing:.04em;color:#365b55;text-shadow:0 1px 2px #fff,0 0 4px #ffffffed;line-height:1.5}
-    @media(max-width:760px){.region-name span{font-size:12px}.region-label{font-size:15px}}
+    .leaflet-interactive.region-lit{filter:drop-shadow(0 0 3px #dfa536b0)}
+    @media (hover:hover) and (pointer:fine) {
+      body:not(.leaflet-dragging) #map path.leaflet-interactive:hover{fill:#bfe4d8}
+      body:not(.leaflet-dragging) #map path.leaflet-interactive:not(.region-lit):hover{stroke:#528d7d;stroke-width:1.4px}
+    }
+    .region-name{background:none;border:0;pointer-events:none}
+    .region-name span{display:block;width:max-content;transform:translate(-50%,-50%);white-space:pre;text-align:center;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-weight:600;letter-spacing:.025em;color:#244940;-webkit-text-stroke:2px #eff8f4;paint-order:stroke fill;line-height:1.2}
+    .region-name.is-badge span{padding:0 2px;border-radius:3px;background:#eff8f4ed;-webkit-text-stroke:0}
+    .region-name.is-selected span{color:#10372f}
     :root{--accent:#168575;--ink:#193c43;--line:#deebe7;--shadow:0 8px 32px #163e3910;color:var(--ink)}
     .app{grid-template-columns:300px minmax(0,1fr)}
     .rail{background:#fff;padding:28px 22px 20px;border-color:var(--line)}
@@ -43,18 +48,19 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
+  <link rel="stylesheet" href="./glass.css">
 </head>
 <body>
   <main class="app">
     <aside class="rail" aria-label="旅行地点">
       <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.6 7-12A7 7 0 1 0 5 9c0 6.4 7 12 7 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" fill="currentColor"/></svg></div><div><h1>我们的旅行地图</h1><p>把一起走过的路，留在这里</p></div></div>
-      <div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" class="search" placeholder="搜索城市或地区" autocomplete="off" aria-label="搜索城市或地区"><div id="searchResults" class="search-results" role="listbox"></div></div>
-      <div class="section-head"><h2>旅行足迹</h2><span id="placeCount" class="count">0 个地点</span></div>
+      <div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" class="search" placeholder="搜索城市或地区" autocomplete="off" aria-label="搜索城市或地区"><div id="searchResults" class="search-results" role="group" aria-label="搜索结果"></div></div>
+      <div class="section-head"><h2>旅行足迹</h2><div class="rail-tools"><span id="placeCount" class="count">0 个地点</span><button id="backupOpen" class="backup-link" disabled>备份与恢复</button></div></div>
       <div id="placeList" class="place-list"><div class="empty-list">还没有旅行足迹。<br>搜索一座城市，或在地图上点一下，收藏你们一起去过的地方。</div></div>
       <div class="rail-foot">旅行记录保存在当前浏览器<br>刷新不丢失 · 暂不跨设备同步。</div>
     </aside>
     <section class="map-shell" aria-label="世界旅行地图"><div id="map" class="map"></div>
-      <div class="map-top"><div class="map-caption"><b>一家人的世界足迹</b><span id="mapCaption">每一枚标记，都是一段共同回忆</span></div><div class="map-actions"><button id="locateBtn" class="icon-btn" title="回到世界地图" aria-label="回到世界地图">◎</button><button id="addBtn" class="pill-btn primary"><span aria-hidden="true">＋</span> 添加地点</button></div></div>
+      <div class="map-top"><div class="map-caption"><b>一家人的世界足迹</b><span id="mapCaption">每一枚标记，都是一段共同回忆</span></div><div class="map-actions"><button id="locateBtn" class="icon-btn" title="回到地图总览" aria-label="回到地图总览"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button><button id="addBtn" class="pill-btn primary"><span aria-hidden="true">＋</span> <span id="addLabel">添加地点</span></button></div></div>
       <div class="map-hint">点地区平滑放大 · 点“添加地点”记录旅程</div>
     </section>
     <aside id="detailPanel" class="panel" aria-label="地点详情" aria-hidden="true"><div class="panel-head"><div><div class="eyebrow">FAMILY TRIP</div><h2 id="panelTitle">新地点</h2></div><button id="closePanel" class="panel-close" aria-label="关闭详情">×</button></div><div class="panel-body">
@@ -63,25 +69,42 @@
       <div class="field"><label for="placeIntro">地区简介</label><textarea id="placeIntro" maxlength="400" placeholder="这座城市有什么特别之处？"></textarea></div>
       <div class="field"><label for="placeMemory">旅行回忆</label><textarea id="placeMemory" class="story" maxlength="3000" placeholder="写下那天的小事、喜欢的风景，或一句只有家人懂的话…"></textarea></div>
       <div class="field"><div class="photo-head">旅行照片 <span id="photoCount">0 张</span></div><div id="photoGrid" class="photo-grid"></div><input id="photoInput" type="file" accept="image/*" multiple hidden></div>
-      <div class="panel-actions"><button id="savePlace" class="save-btn">保存地点</button><button id="deletePlace" class="delete-btn">删除</button></div>
-    </div></aside>
+    </div><div class="panel-actions"><button id="savePlace" class="save-btn">保存地点</button><button id="deletePlace" class="delete-btn">删除</button></div></aside>
   </main>
-  <div id="addModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><h2 id="modalTitle">添加旅行地点</h2><p id="modalCoords">在地图上选中的位置</p><div class="field"><label for="newName">地点名称</label><input id="newName" maxlength="80" placeholder="例如：东京"></div><div class="field"><label for="newDate">旅行日期（可稍后补充）</label><input id="newDate" type="date"></div><div class="modal-actions"><button id="cancelAdd" class="cancel-btn">取消</button><button id="confirmAdd" class="save-btn">添加地点</button></div></div></div>
+  <dialog id="addModal" class="modal" aria-labelledby="modalTitle"><h2 id="modalTitle">添加旅行地点</h2><p id="modalCoords">在地图上选中的位置</p><div class="field"><label for="newName">地点名称</label><input id="newName" maxlength="80" placeholder="例如：东京" autofocus></div><div class="field"><label for="newDate">旅行日期（可稍后补充）</label><input id="newDate" type="date"></div><p id="addError" role="alert" hidden></p><div class="modal-actions"><button id="cancelAdd" class="cancel-btn">取消</button><button id="confirmAdd" class="save-btn">添加地点</button></div></dialog>
+  <dialog id="backupDialog" class="modal" aria-labelledby="backupTitle">
+    <div class="backup-heading"><h2 id="backupTitle">备份与恢复</h2><button id="backupClose" class="panel-close" aria-label="关闭备份与恢复">×</button></div>
+    <p>下载已保存的地点、回忆和原始照片。备份不加密，请自行妥善保管。</p>
+    <button id="backupDownload" class="save-btn backup-download">下载完整备份</button>
+    <section class="backup-restore" aria-labelledby="restoreTitle">
+      <h3 id="restoreTitle">从备份恢复</h3>
+      <p>先校验文件，再确认恢复。相同记录会跳过，不同版本会另存副本，不覆盖现有内容。</p>
+      <input type="file" id="backupFile" accept=".travelmap,application/octet-stream" hidden>
+      <div class="modal-actions"><button id="backupChoose" class="cancel-btn">选择备份文件</button><button id="backupRestore" class="save-btn" disabled>确认恢复</button></div>
+      <p id="backupStatus" role="status" aria-live="polite"></p>
+    </section>
+  </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./leaflet.js" crossorigin=""></script>
   <script src="./local-store.js"></script>
-  <script>(() => {
+  <script type="module">
+  import {labelShape, labelFits} from "./region-labels.js";
+  import {makeBackup, readBackup, planRestore} from "./backup.js";
+  (() => {
   const $ = (s) => document.querySelector(s), dbName = "family-travel-map-v1";
   let db, places = [], markers = /* @__PURE__ */ new Map(), selectedId = null, pendingPoint = null, toastTimer;
-  const map = L.map("map", { zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: true }).setView([24, 8], 2);
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const homeCenter = () => window.innerWidth <= 760 ? [31, 105] : [24, 8];
+  const map = L.map("map", { zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: true, zoomAnimation: !reducedMotion.matches, inertia: !reducedMotion.matches }).setView(homeCenter(), 2);
+  reducedMotion.addEventListener("change", () => { map.options.inertia = !reducedMotion.matches; });
   L.control.zoom({ position: "bottomright" }).addTo(map);
-  let mapMoving = false;
-  map.on("movestart", () => { mapMoving = true; });
-  map.on("moveend", () => { mapMoving = false; });
   map.attributionControl.addAttribution('World boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>');
-  const baseRegionStyle = { color: "#9fc8bc", weight: 1, fillColor: "#d1ebe2", fillOpacity: 0.94 };
-  const litRegionStyle = { color: "#c18426", weight: 2, fillColor: "#d1ebe2", fillOpacity: 0.94 };
-  const motion = (duration = 1.2) => ({ duration, easeLinearity: 0.25, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches });
+  for (const [name, order] of [["countries", 400], ["administrative", 410], ["cities", 420]]) {
+    map.createPane(name).style.zIndex = order;
+  }
+  const baseRegionStyle = { color: "#90b9ae", weight: 0.9, fillColor: "#d1ebe2", fillOpacity: 1, lineJoin: "round", smoothFactor: 0.5 };
+  const litRegionStyle = { ...baseRegionStyle, color: "#a46619", weight: 2 };
+  const motion = (duration = 1.2) => ({ duration, easeLinearity: 0.25, animate: !reducedMotion.matches });
   const visitCache = new WeakMap();
   let visitSignature = "";
   function pointInRing([x, y], ring) {
@@ -110,9 +133,10 @@
   function paintRegion(layer) {
     const hidden = layer === hiddenCountry || layer === hiddenProvince;
     const lit = featureHasVisit(layer.feature);
-    layer.setStyle({ ...(lit ? litRegionStyle : baseRegionStyle), opacity: hidden ? 0 : 1, fillOpacity: hidden ? 0 : 0.94 });
+    layer.setStyle({ ...(lit ? litRegionStyle : baseRegionStyle), opacity: hidden ? 0 : 1, fillOpacity: hidden ? 0 : 1 });
     if (layer.getElement()) layer.getElement().style.pointerEvents = hidden ? "none" : "";
-    layer.getElement()?.classList.toggle("region-lit", lit);
+    layer.getElement()?.classList.toggle("region-lit", lit && !hidden);
+    if (lit && !hidden) layer.bringToFront();
   }
   function renderVisitedRegions() {
     visitSignature = places.map((p) => `${p.id}:${p.lat}:${p.lng}`).sort().join("|");
@@ -121,55 +145,129 @@
     cityLayer.eachLayer(paintRegion);
     updateRegionNames();
   }
-  let regionSelection = null, regionRevision = 0;
-  let hiddenCountry = null, hiddenProvince = null, regionLabel = null;
-  const nameLabels = L.layerGroup().addTo(map), namePoints = new WeakMap();
-  function nameMetrics(name, width, height) {
-    const font = Math.min(18, Math.max(9, 8 + Math.sqrt(Math.min(width, height)) / 2));
-    const textWidth = [...name].reduce((n, c) => n + (c.charCodeAt(0) > 255 ? font : font * 0.56), 8);
-    return { font, width: textWidth, height: font * 1.5, visible: Math.min(width, height) >= 14 && textWidth <= width * 1.3 && font * 1.5 <= height * 1.3 };
+  let regionSelection = null, regionRevision = 0, pickingPoint = false;
+  const adminCountryNames = { CHN: "中国", USA: "美国", AUS: "澳大利亚", TWN: "台湾", PRK: "朝鲜", KOR: "韩国", COD: "刚果（金）", COG: "刚果（布）" };
+  function regionName(p) {
+    return p.name || adminCountryNames[p.ADM0_A3] || p.NAME_ZH || p.NAME || p.name_en || p.ADMIN || "";
   }
-  function regionNameMetrics(layer, name) {
-    const bounds = layer.getBounds(), nw = map.project(bounds.getNorthWest()), se = map.project(bounds.getSouthEast());
-    return nameMetrics(name, Math.abs(se.x - nw.x), Math.abs(se.y - nw.y));
+  let hiddenCountry = null, hiddenProvince = null, labelFrame = 0;
+  const namePoints = new WeakMap(), nameMarkers = new Map();
+  const measure = document.createElement("canvas").getContext("2d");
+  const widths = new Map();
+  function textWidth(name, font) {
+    const key = `${font}:${name}`;
+    if (!widths.has(key)) {
+      measure.font = `600 ${font}px "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif`;
+      widths.set(key, measure.measureText(name).width + [...name].length * font * 0.025);
+    }
+    return widths.get(key);
   }
-  function resizeRegionNames() {
-    nameLabels.eachLayer((marker) => {
-      const metrics = regionNameMetrics(marker.options.region, marker.options.regionName);
-      const el = marker.getElement();
-      if (el) { el.style.visibility = metrics.visible ? "visible" : "hidden"; el.querySelector("span").style.fontSize = `${metrics.font}px`; }
-    });
-    if (regionLabel && regionSelection) {
-      const el = regionLabel.getElement();
-      if (el) el.style.fontSize = `${regionNameMetrics(regionSelection.layer, regionSelection.name).font}px`;
+  function* labelOptions(name, p, font, compact) {
+    if (compact) {
+      if (/\p{Script=Han}/u.test(name)) {
+        const chars = [...name].filter(c => /\p{Script=Han}/u.test(c));
+        yield {lines:[chars.slice(0,4).join("")], font:9, badge:true};
+        if (chars.length > 2) yield {lines:[chars.slice(0,2).join("")], font:9, badge:true};
+        return;
+      }
+      const code = [p.ISO_A2, p.postal, p.ADM0_A3].find(s => /^[A-Z]{2,3}$/.test(s || ""));
+      const abbrev = p.ABBREV || p.abbrev;
+      if (abbrev && abbrev !== name && abbrev.length <= 7) yield {lines:[abbrev], font:9, badge:true};
+      const short = code || name.replace(/[^\p{L}]/gu, "").slice(0, 3);
+      yield {lines:[short || name], font:9, badge:true};
+      return;
+    }
+    const words = name.replace(/-(?=\S)/g, "- ").split(/\s+/);
+    for (const size of new Set([font, Math.min(font, 12), 10, 9])) {
+      yield {lines:[name], font:size};
+      // Break between words only, choosing the shortest two-line footprint.
+      let wrapped = null, width = Infinity;
+      for (let i = 1; i < words.length; i++) {
+        const lines = [words.slice(0,i).join(" "), words.slice(i).join(" ")];
+        const longest = Math.max(...lines.map(line => textWidth(line,size)));
+        if (longest < width) { wrapped = lines; width = longest; }
+      }
+      if (wrapped) yield {lines:wrapped, font:size};
     }
   }
+  const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   function updateRegionNames() {
-    nameLabels.clearLayers();
-    const layers = adminLayer.getLayers().length ? [...adminLayer.getLayers(), ...cityLayer.getLayers()] : countryLayer.getLayers();
-    const boxes = [], size = map.getSize();
+    if (!labelFrame) labelFrame = requestAnimationFrame(() => { labelFrame = 0; layoutNames(); });
+  }
+  function layoutNames(targetZoom = map.getZoom(), targetCenter = map.getCenter(), shrinking = false) {
+    // Expanding one region replaces only its own label, not the neighboring countries.
+    const layers = [...cityLayer.getLayers(), ...adminLayer.getLayers(), ...countryLayer.getLayers()];
+    const scale = map.getZoomScale(targetZoom, 0), size = map.getSize(), view = map.getContainer().getBoundingClientRect();
+    const origin = map.project(targetCenter, targetZoom).subtract(size.divideBy(2));
+    const chrome = [...document.querySelectorAll(".rail,.map-caption,.map-actions,.map-hint,.leaflet-control-zoom")]
+      .map(el => el.getBoundingClientRect()).filter(r => r.width && r.height)
+      .map(r => ({left:r.left-view.left, right:r.right-view.left, top:r.top-view.top, bottom:r.bottom-view.top}));
+    const candidates = [];
     for (const layer of layers) {
-      if (layer === hiddenProvince) continue;
+      if (layer === hiddenProvince || layer === hiddenCountry || (shrinking && !nameMarkers.has(layer))) continue;
+      if (!namePoints.has(layer.feature.geometry)) {
+        namePoints.set(layer.feature.geometry, labelShape(layer.feature.geometry, ([lng, lat]) => {
+          const {x, y} = map.project([lat, lng], 0); return [x, y];
+        }));
+      }
+      const shape = namePoints.get(layer.feature.geometry);
       const p = layer.feature.properties;
-      const name = p.name || p.name_en || adminCountryNames[p.ADM0_A3] || p.NAME || p.ADMIN;
-      if (!name || (regionLabel && name === regionSelection?.name)) continue;
-      const metrics = regionNameMetrics(layer, name);
-      if (!metrics.visible) continue;
-      if (!namePoints.has(layer)) namePoints.set(layer, regionLabelPoint(layer, layer.getBounds().getCenter()));
-      const anchor = namePoints.get(layer), screen = map.latLngToContainerPoint(anchor);
-      const box = { left: screen.x - metrics.width / 2, right: screen.x + metrics.width / 2, top: screen.y - metrics.height / 2 - 3, bottom: screen.y + metrics.height / 2 + 3 };
-      if (box.right < 0 || box.left > size.x || box.bottom < 0 || box.top > size.y) continue;
-      if (boxes.some((b) => box.left < b.right && box.right > b.left && box.top < b.bottom && box.bottom > b.top)) continue;
-      boxes.push(box);
-      L.marker(anchor, { region: layer, regionName: name, interactive: false, keyboard: false, icon: L.divIcon({ className: "region-name", html: `<span style="font-size:${metrics.font}px;text-align:center">${esc(name)}</span>`, iconSize: [0, 0], iconAnchor: [0, 0] }) }).addTo(nameLabels);
+      const name = regionName(p);
+      if (!shape || !name) continue;
+      const selected = layer === regionSelection?.layer;
+      const font = Math.min(size.x <= 760 ? 15 : 17, Math.max(10, Math.round(9 + Math.sqrt(Math.min(shape.width, shape.height) * scale) / 3)));
+      const x = shape.anchor[0] * scale - origin.x, y = shape.anchor[1] * scale - origin.y;
+      if (x < 0 || x > size.x || y < 0 || y > size.y) continue;
+      const tier = layer.options.pane === "cities" ? 2 : layer.options.pane === "administrative" ? 1 : 0;
+      candidates.push({layer, name, p, shape, selected, font, x, y, tier});
+    }
+    candidates.sort((a, b) => Number(b.selected) - Number(a.selected) || b.tier - a.tier || b.shape.area - a.shape.area);
+    const boxes = [], visible = new Set();
+    // Reserve room for full names first. Tiny regions get a centered badge, never
+    // a label moved into a neighboring region; coincident badges wait for zoom.
+    for (const compact of shrinking ? [false] : [false, true]) {
+      for (const {layer, name, p, shape, selected, font, x, y, tier} of candidates) {
+        if (visible.has(layer)) continue;
+        let marker = nameMarkers.get(layer);
+        const options = shrinking ? [marker.options.labelVariant] : labelOptions(name, p, font, compact);
+        for (const variant of options) {
+          const {lines, font, badge} = variant;
+          const hw = Math.max(...lines.map(line => textWidth(line,font))) / 2 + (badge ? 3.5 : 1.5);
+          const hh = font * 0.6 * lines.length + 1.5;
+          // At world scale only, give prominent country names a little extra room.
+          const fitScale = scale * (tier === 0 && targetZoom <= 2 && p.LABELRANK <= 3 ? 1.25 : 1);
+          const box = {left:x-hw, right:x+hw, top:y-hh, bottom:y+hh};
+          if (box.left < 0 || box.right > size.x || box.top < 0 || box.bottom > size.y ||
+              chrome.some(b => overlaps(box,b)) || boxes.some(b => overlaps(box,b)) ||
+              (!badge && !labelFits(shape,hw / fitScale,hh / fitScale))) continue;
+          visible.add(layer);
+          boxes.push(box);
+          if (shrinking) break;
+          if (!marker) {
+            const anchor = map.unproject(L.point(...shape.anchor), 0);
+            marker = L.marker(anchor, {interactive:false, keyboard:false,
+              icon:L.divIcon({className:"region-name", html:"<span></span>", iconSize:[0,0], iconAnchor:[0,0]})}).addTo(map);
+            nameMarkers.set(layer, marker);
+          }
+          const el = marker.getElement(), span = el.firstElementChild, text = lines.join("\n");
+          if (span.textContent !== text) span.textContent = text;
+          if (marker.options.labelVariant?.font !== font) span.style.fontSize = `${font}px`;
+          marker.options.labelVariant = variant;
+          el.dataset.regionName = name;
+          el.classList.toggle("is-badge", !!badge);
+          el.classList.toggle("is-selected", selected);
+          break;
+        }
+      }
+    }
+    for (const [layer, marker] of nameMarkers) {
+      if (!visible.has(layer)) { marker.remove(); nameMarkers.delete(layer); }
     }
   }
-  function showChildNames() {
-    if (regionLabel) { map.removeLayer(regionLabel); regionLabel = null; }
-    updateRegionNames();
-  }
-  map.on("moveend", updateRegionNames);
-  map.on("zoom", resizeRegionNames);
+  map.on("zoom moveend resize", updateRegionNames);
+  // During a CSS zoom-out, discard labels that won't fit at the smaller scale
+  // before Leaflet animates their positions. Fly-to uses live zoom events instead.
+  map.on("zoomanim", ({zoom, center}) => { if (zoom < map.getZoom()) layoutNames(zoom, center, true); });
   function clearCities() {
     cityLayer.clearLayers();
     const previous = hiddenProvince;
@@ -182,26 +280,12 @@
     hiddenCountry = null;
     if (previous) paintRegion(previous);
   }
-  function regionLabelPoint(layer, fallback) {
-    const bounds = layer.getBounds(), center = bounds.getCenter();
-    const inside = (p) => geometryContainsPoint([p.lng, p.lat], layer.feature.geometry);
-    if (inside(center)) return center;
-    let best = fallback, distance = Infinity;
-    for (let y = 1; y < 16; y++) for (let x = 1; x < 16; x++) {
-      const p = L.latLng(bounds.getSouth() + (bounds.getNorth() - bounds.getSouth()) * y / 16, bounds.getWest() + (bounds.getEast() - bounds.getWest()) * x / 16);
-      const d = (p.lat - center.lat) ** 2 + (p.lng - center.lng) ** 2;
-      if (d < distance && inside(p)) { best = p; distance = d; }
-    }
-    return best;
-  }
   function zoomToRegion(layer, name, latlng, maxZoom = 9) {
     const bounds = layer.getBounds();
     if (!bounds.isValid()) return;
     map.stop();
     regionSelection = { name, latlng, layer };
-    if (regionLabel) map.removeLayer(regionLabel);
-    regionLabel = L.tooltip({ permanent: true, direction: "center", className: "region-label", opacity: 1 }).setLatLng(regionLabelPoint(layer, latlng)).setContent(esc(name)).addTo(map);
-    resizeRegionNames();
+    updateRegionNames();
     const mobile = window.innerWidth <= 760;
     map.flyToBounds(bounds, {
       paddingTopLeft: mobile ? [24, $(".rail").offsetHeight + 30] : [35, 90],
@@ -209,43 +293,48 @@
       maxZoom, ...motion()
     });
     $("#mapCaption").textContent = `${name} · 探索这片足迹`;
-    $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
+    refreshMapActions();
   }
-  const countryLayer = L.geoJSON(null, { style: (feature) => featureHasVisit(feature) ? litRegionStyle : baseRegionStyle, onEachFeature: (feature, layer) => {
-    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.4 }), mouseout: () => paintRegion(layer), click: (e) => {
-      L.DomEvent.stopPropagation(e);
-      const n = feature.properties?.NAME || feature.properties?.ADMIN || "";
+  function pickRegion(e, feature) {
+    L.DomEvent.stopPropagation(e);
+    if (!pickingPoint) return false;
+    askAdd(e.latlng, regionName(feature.properties));
+    return true;
+  }
+  const countryLayer = L.geoJSON(null, { pane:"countries", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("click", (e) => {
+      if (pickRegion(e, feature)) return;
       const code = feature.properties?.ADM0_A3 || feature.properties?.ADM0_A3_EH;
       const revision = ++regionRevision;
       restoreCountry();
       clearCities();
       adminLayer.clearLayers();
-      zoomToRegion(layer, adminCountryNames[code] || n, e.latlng, 7);
+      zoomToRegion(layer, regionName(feature.properties), e.latlng, 7);
       updateRegionNames();
       if (["CHN", "USA", "AUS"].includes(code)) {
         showAdminRegions(code, revision, layer);
         return;
       }
-    } });
+    });
     paintRegion(layer);
   } }).addTo(map);
-  const adminLayer = L.geoJSON(null, { style: (feature) => featureHasVisit(feature) ? litRegionStyle : baseRegionStyle, onEachFeature: (feature, layer) => {
-    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.6 }), mouseout: () => paintRegion(layer), click: (e) => {
-      L.DomEvent.stopPropagation(e);
+  const adminLayer = L.geoJSON(null, { pane:"administrative", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("click", (e) => {
+      if (pickRegion(e, feature)) return;
       const revision = ++regionRevision;
       clearCities();
       zoomToRegion(layer, feature.properties?.name || feature.properties?.name_en || "", e.latlng);
       updateRegionNames();
       if (feature.properties?.level === "province") showChinaCities(layer, revision);
-    } });
+    });
     paintRegion(layer);
   } }).addTo(map);
-  const cityLayer = L.geoJSON(null, { style: baseRegionStyle, onEachFeature: (feature, layer) => {
-    layer.on({ mouseover: () => layer.setStyle({ fillColor: "#bfe4d8", color: "#65ad99", weight: 1.4 }), mouseout: () => paintRegion(layer), click: (e) => {
-      L.DomEvent.stopPropagation(e);
+  const cityLayer = L.geoJSON(null, { pane:"cities", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("click", (e) => {
+      if (pickRegion(e, feature)) return;
       ++regionRevision;
       zoomToRegion(layer, feature.properties.name, e.latlng, 11);
-    } });
+    });
     paintRegion(layer);
   } }).addTo(map);
   const chinaData = new Map();
@@ -263,7 +352,6 @@
       cityLayer.addData({ type: "FeatureCollection", features });
       hiddenProvince = province;
       renderVisitedRegions();
-      showChildNames();
       $("#mapCaption").textContent = `${province.feature.properties.name} · 点击城市／区继续放大`;
       notify("市／区地图已载入，点击地区可放大并记录旅行");
     } catch {
@@ -271,8 +359,6 @@
     }
   }
   let adminDataPromise = null;
-  const adminCountryNames = { CHN: "中国", USA: "美国", AUS: "澳大利亚" };
-  const chinaProvinceNames = { Anhui: "安徽", Beijing: "北京", Chongqing: "重庆", Fujian: "福建", Gansu: "甘肃", Guangdong: "广东", Guangxi: "广西", Guizhou: "贵州", Hainan: "海南", Hebei: "河北", Heilongjiang: "黑龙江", Henan: "河南", Hubei: "湖北", Hunan: "湖南", Jiangsu: "江苏", Jiangxi: "江西", Jilin: "吉林", Liaoning: "辽宁", "Inner Mongol": "内蒙古", "Nei Mongol": "内蒙古", Ningxia: "宁夏", Qinghai: "青海", Shaanxi: "陕西", Shandong: "山东", Shanghai: "上海", Shanxi: "山西", Sichuan: "四川", Tianjin: "天津", Tibet: "西藏", Xizang: "西藏", Xinjiang: "新疆", Yunnan: "云南", Zhejiang: "浙江" };
   async function showAdminRegions(countryCode, revision, country) {
     try {
       notify("正在载入省／州地图…");
@@ -282,7 +368,6 @@
         adminLayer.addData({ type: "FeatureCollection", features: data.features.filter((f) => f.properties?.name) });
         hiddenCountry = country;
         renderVisitedRegions();
-        showChildNames();
         $("#mapCaption").textContent = "中国 · 点击省份查看市级地图";
         notify("点击省份进入市级地图；直辖市按区展示");
         return;
@@ -293,43 +378,40 @@
       }).catch((e) => { adminDataPromise = null; throw e; });
       const data = await adminDataPromise;
       if (revision !== regionRevision) return;
-      let features = data.features.filter((f) => {
+      const features = data.features.filter((f) => {
         const code = String(f.properties?.iso_3166_2 || "");
-        if (countryCode === "CHN") return code.startsWith("CN-");
         if (countryCode === "USA") return code.startsWith("US-") && !["US-PR", "US-GU", "US-VI", "US-MP", "US-AS", "US-UM"].includes(code);
         return ["AU-NSW", "AU-QLD", "AU-SA", "AU-TAS", "AU-VIC", "AU-WA", "AU-NT", "AU-ACT"].includes(code);
       });
-      if (countryCode === "CHN") features = features.map((f) => ({ ...f, properties: { ...f.properties, name: chinaProvinceNames[f.properties?.name] || f.properties?.name } }));
       if (!features.length) throw Error("没有找到省／州边界");
       adminLayer.clearLayers();
       adminLayer.addData({ type: "FeatureCollection", features });
       hiddenCountry = country;
       renderVisitedRegions();
-      showChildNames();
       $("#mapCaption").textContent = `${adminCountryNames[countryCode]} · 点击省／州继续放大`;
-      $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
+      refreshMapActions();
       notify("省／州地图已载入，已记录的地区会亮起");
     } catch (e) {
-      notify("省／州边界暂时无法载入，请检查网络后重试", true);
+      if (revision === regionRevision) notify("省／州边界暂时无法载入，请检查网络后重试", true);
     }
   }
   function returnToWorld() {
     ++regionRevision;
     regionSelection = null;
+    pickingPoint = false;
     restoreCountry();
     clearCities();
-    if (regionLabel) { map.removeLayer(regionLabel); regionLabel = null; }
     map.stop();
     adminLayer.clearLayers();
     updateRegionNames();
     $("#mapCaption").textContent = "每一枚标记，都是一段共同回忆";
-    $(".map-hint").textContent = "点地区平滑放大 · 点“添加地点”记录旅程";
-    map.flyTo([24, 8], 2, motion());
+    refreshMapActions();
+    map.flyTo(homeCenter(), 2, motion());
   }
   fetch("world.geojson").then((r) => {
     if (!r.ok) throw Error("Map data unavailable");
     return r.json();
-  }).then((data) => { countryLayer.addData(data); updateRegionNames(); }).catch(() => notify("\u4E16\u754C\u8F6E\u5ED3\u52A0\u8F7D\u5931\u8D25\uFF0C\u53EF\u5237\u65B0\u9875\u9762\u91CD\u8BD5", true));
+  }).then((data) => { countryLayer.addData(data); renderVisitedRegions(); }).catch(() => notify("\u4E16\u754C\u8F6E\u5ED3\u52A0\u8F7D\u5931\u8D25\uFF0C\u53EF\u5237\u65B0\u9875\u9762\u91CD\u8BD5", true));
   function openDb() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(dbName, 1);
@@ -376,10 +458,11 @@
     const d = /* @__PURE__ */ new Date(s + "T00:00:00");
     return new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric" }).format(d);
   }
-  function render() {
+  function render(keepFields = false) {
     places.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     renderVisitedRegions();
     $("#placeCount").textContent = places.length + " \u4E2A\u5730\u70B9";
+    refreshMapActions();
     if (!regionSelection) $("#mapCaption").textContent = places.length ? `已经收藏 ${places.length} 段家庭旅行` : "每一枚标记，都是一段共同回忆";
     $("#placeList").innerHTML = places.length ? places.map((p) => `<button class="place-row ${p.id === selectedId ? "active" : ""}" data-id="${esc(p.id)}"><span class="place-emoji">\u{1F4CD}</span><span><strong>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</strong><small>${esc(dateLabel(p.date))}</small></span></button>`).join("") : '<div class="empty-list">\u8FD8\u6CA1\u6709\u65C5\u884C\u8DB3\u8FF9\u3002<br>\u641C\u7D22\u4E00\u5EA7\u57CE\u5E02\uFF0C\u6216\u5728\u5730\u56FE\u4E0A\u70B9\u4E00\u4E0B\uFF0C\u6536\u85CF\u4F60\u4EEC\u4E00\u8D77\u53BB\u8FC7\u7684\u5730\u65B9\u3002</div>';
     places.forEach((p) => {
@@ -400,14 +483,12 @@
     }
     if (selectedId) {
       const p = places.find((x) => x.id === selectedId);
-      if (p) fillPanel(p);
+      if (p) fillPanel(p, keepFields);
     }
   }
-  function fillPanel(p) {
-    $("#placeName").value = p.name || "";
-    $("#placeDate").value = p.date || "";
-    $("#placeIntro").value = p.intro || "";
-    $("#placeMemory").value = p.memory || "";
+  const detailFields = {name:"#placeName", date:"#placeDate", intro:"#placeIntro", memory:"#placeMemory"};
+  function fillPanel(p, keepFields = false) {
+    if (!keepFields) for (const [key, field] of Object.entries(detailFields)) $(field).value = p[key] || "";
     $("#photoCount").textContent = (p.photos || []).length + " \u5F20";
     $("#photoGrid").innerHTML = (p.photos || []).map((photo, i) => {
       const src = typeof photo === "string" ? photo : photo.url;
@@ -421,53 +502,88 @@
     el.classList.add("open");
     el.setAttribute("aria-hidden", "false");
   }
-  function closePanel() {
+  function canLeaveDetails() {
+    const p = places.find(x => x.id === selectedId);
+    return !p || !Object.entries(detailFields).some(([key, field]) => $(field).value !== (p[key] || "")) ||
+      window.confirm("有未保存的修改。要放弃这些修改吗？");
+  }
+  function closePanel(force = false) {
+    if (!force && !canLeaveDetails()) return false;
     const el = $("#detailPanel");
     el.classList.remove("open");
     el.setAttribute("aria-hidden", "true");
     selectedId = null;
     render();
+    return true;
   }
   function selectPlace(placeId) {
+    if (placeId === selectedId) return;
+    if (!canLeaveDetails()) return;
     selectedId = placeId;
     render();
     openPanel();
     const p = places.find((x) => x.id === placeId);
-    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) map.panTo([p.lat, p.lng], { animate: true, duration: 0.45 });
+    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) map.panTo([p.lat, p.lng], motion(0.45));
+  }
+  function refreshMapActions() {
+    const hint = $(".map-hint");
+    hint.hidden = !pickingPoint && places.length > 0;
+    hint.textContent = pickingPoint ? "点选地图上的位置 · Esc 取消" : "点地区放大 · 添加地点记录旅程";
+    $("#map").classList.toggle("picking-point", pickingPoint);
+    $("#addLabel").textContent = pickingPoint ? "取消选点" : regionSelection ? "记录到这里" : "添加地点";
+    updateRegionNames();
   }
   function askAdd(latlng, name = "") {
+    if ($("#addModal").open || (selectedId && !closePanel())) return;
+    pickingPoint = false;
+    refreshMapActions();
     pendingPoint = { lat: latlng.lat, lng: latlng.lng };
-    $("#modalCoords").textContent = `\u4F4D\u7F6E ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+    $("#modalCoords").textContent = name ? `记录位置：${name}` : "记录地图上选中的位置";
     $("#newName").value = name;
     $("#newDate").value = "";
-    $("#addModal").classList.add("show");
-    setTimeout(() => $("#newName").focus(), 80);
+    $("#addError").hidden = true;
+    $("#addModal").showModal();
   }
   map.on("click", (e) => askAdd(e.latlng));
-  $("#addBtn").onclick = () => askAdd(regionSelection?.latlng || map.getCenter(), regionSelection?.name || "");
-  $("#locateBtn").onclick = returnToWorld;
-  $("#closePanel").onclick = closePanel;
-  $("#cancelAdd").onclick = () => $("#addModal").classList.remove("show");
-  $("#addModal").onclick = (e) => {
-    if (e.target === $("#addModal")) $("#addModal").classList.remove("show");
+  $("#addBtn").onclick = () => {
+    if (regionSelection && !pickingPoint) askAdd(regionSelection.latlng, regionSelection.name);
+    else { pickingPoint = !pickingPoint; refreshMapActions(); }
   };
+  $("#locateBtn").onclick = returnToWorld;
+  $("#closePanel").onclick = () => closePanel();
+  $("#cancelAdd").onclick = () => { if (!$("#confirmAdd").disabled) $("#addModal").close(); };
+  $("#addModal").oncancel = (e) => { if ($("#confirmAdd").disabled) e.preventDefault(); };
+  $("#addModal").onclick = (e) => {
+    if (e.target === $("#addModal")) {
+      const r = e.target.getBoundingClientRect();
+      if (!$("#confirmAdd").disabled && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) e.target.close();
+    }
+  };
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !$("#addModal").open && pickingPoint) {
+      pickingPoint = false;
+      refreshMapActions();
+    }
+  });
   $("#confirmAdd").onclick = async () => {
     const name = $("#newName").value.trim();
-    if (!name) {
+    if (!name || !pendingPoint || $("#confirmAdd").disabled) {
       $("#newName").focus();
       return;
     }
     const p = { id: id(), name, date: $("#newDate").value, lat: pendingPoint.lat, lng: pendingPoint.lng, intro: "", memory: "", photos: [], createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+    $("#confirmAdd").disabled = true;
     try {
       await saveRecord(p);
       places.push(p);
-      $("#addModal").classList.remove("show");
+      $("#addModal").close();
       render();
       selectPlace(p.id);
       notify("\u5730\u70B9\u5DF2\u6DFB\u52A0\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u70B9\u4EAE \u2728");
     } catch (e) {
-      notify("\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
-    }
+      $("#addError").textContent = "保存失败，请检查浏览器存储空间后重试。";
+      $("#addError").hidden = false;
+    } finally { $("#confirmAdd").disabled = false; }
   };
   $("#placeList").onclick = (e) => {
     const b = e.target.closest("[data-id]");
@@ -476,13 +592,12 @@
   $("#savePlace").onclick = async () => {
     const p = places.find((x) => x.id === selectedId);
     if (!p) return;
-    p.name = $("#placeName").value.trim() || "\u672A\u547D\u540D\u5730\u70B9";
-    p.date = $("#placeDate").value;
-    p.intro = $("#placeIntro").value.trim();
-    p.memory = $("#placeMemory").value.trim();
+    const updated = {...p, ...Object.fromEntries(Object.entries(detailFields).map(([key, field]) => [key, $(field).value.trim()]))};
+    updated.name ||= "未命名地点";
     try {
-      await saveRecord(p);
-      render();
+      await saveRecord(updated);
+      Object.assign(p, updated);
+      render(selectedId !== p.id);
       notify("\u65C5\u884C\u8BB0\u5F55\u5DF2\u4FDD\u5B58\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u70B9\u4EAE \u2728");
     } catch (e) {
       notify("\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
@@ -495,9 +610,8 @@
     try {
       await deleteRecord(p.id);
       places = places.filter((x) => x.id !== p.id);
-      selectedId = null;
-      $("#detailPanel").classList.remove("open");
-      render();
+      if (selectedId === p.id) closePanel(true);
+      else render(true);
       notify("\u5730\u70B9\u53CA\u7167\u7247\u5DF2\u5220\u9664\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u7184\u706D");
     } catch (e) {
       notify("\u5220\u9664\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5", true);
@@ -515,7 +629,7 @@
       try {
         await api(`/api/photos/${encodeURIComponent(p.id)}/${encodeURIComponent(photo.id)}`, { method: "DELETE" });
         p.photos.splice(Number(b.dataset.photo), 1);
-        fillPanel(p);
+        if (selectedId === p.id) fillPanel(p, true);
         notify("\u7167\u7247\u5DF2\u5220\u9664");
       } catch {
         notify("\u5220\u9664\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5", true);
@@ -536,25 +650,13 @@
         await api(`/api/photos/${encodeURIComponent(p.id)}`, { method: "POST", body: form });
       }
       places = await allPlaces();
-      render();
-      fillPanel(places.find((x) => x.id === selectedId));
+      render(true);
       notify(`\u5DF2\u6DFB\u52A0 ${allowed.length} \u5F20\u7167\u7247`);
     } catch (err) {
       notify("\u7167\u7247\u672A\u80FD\u4FDD\u5B58\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u540E\u91CD\u8BD5", true);
     }
     e.target.value = "";
   };
-  setInterval(async () => {
-    if (selectedId || document.hidden || mapMoving) return;
-    try {
-      const latest = await allPlaces();
-      if (JSON.stringify(latest) !== JSON.stringify(places)) {
-        places = latest;
-        render();
-      }
-    } catch {
-    }
-  }, 15e3);
   const cityIndex = [["\u5317\u4EAC", 39.9042, 116.4074, "beijing \u5317\u4EAC Beijing"], ["\u4E0A\u6D77", 31.2304, 121.4737, "shanghai \u4E0A\u6D77 Shanghai"], ["\u6210\u90FD", 30.5728, 104.0668, "chengdu \u6210\u90FD Chengdu"], ["\u676D\u5DDE", 30.2741, 120.1551, "hangzhou \u676D\u5DDE Hangzhou"], ["\u897F\u5B89", 34.3416, 108.9398, "xian \u897F\u5B89 Xi\u2019an"], ["\u9999\u6E2F", 22.3193, 114.1694, "hong kong \u9999\u6E2F Hong Kong"], ["\u4E1C\u4EAC", 35.6762, 139.6503, "tokyo \u4E1C\u4EAC Tokyo"], ["\u4EAC\u90FD", 35.0116, 135.7681, "kyoto \u4EAC\u90FD Kyoto"], ["\u5927\u962A", 34.6937, 135.5023, "osaka \u5927\u962A Osaka"], ["\u9996\u5C14", 37.5665, 126.978, "seoul \u9996\u5C14 Seoul"], ["\u65B0\u52A0\u5761", 1.3521, 103.8198, "singapore \u65B0\u52A0\u5761 Singapore"], ["\u66FC\u8C37", 13.7563, 100.5018, "bangkok \u66FC\u8C37 Bangkok"], ["\u5DF4\u9ECE", 48.8566, 2.3522, "paris \u5DF4\u9ECE Paris"], ["\u4F26\u6566", 51.5072, -0.1276, "london \u4F26\u6566 London"], ["\u7F57\u9A6C", 41.9028, 12.4964, "rome \u7F57\u9A6C Rome"], ["\u7EBD\u7EA6", 40.7128, -74.006, "new york \u7EBD\u7EA6 New York"], ["\u6D1B\u6749\u77F6", 34.0522, -118.2437, "los angeles \u6D1B\u6749\u77F6 Los Angeles"], ["\u65E7\u91D1\u5C71", 37.7749, -122.4194, "san francisco \u65E7\u91D1\u5C71 San Francisco"], ["\u6089\u5C3C", -33.8688, 151.2093, "sydney \u6089\u5C3C Sydney"], ["\u58A8\u5C14\u672C", -37.8136, 144.9631, "melbourne \u58A8\u5C14\u672C Melbourne"], ["\u6E29\u54E5\u534E", 49.2827, -123.1207, "vancouver \u6E29\u54E5\u534E Vancouver"], ["\u8FEA\u62DC", 25.2048, 55.2708, "dubai \u8FEA\u62DC Dubai"], ["\u4F0A\u65AF\u5766\u5E03\u5C14", 41.0082, 28.9784, "istanbul \u4F0A\u65AF\u5766\u5E03\u5C14 Istanbul"], ["\u4E09\u4E9A", 18.2528, 109.5119, "sanya \u4E09\u4E9A Sanya"]];
   function showSearchResults(data, local = false) {
     const box = $("#searchResults");
@@ -567,9 +669,6 @@
     showSearchResults(hits, true);
   }
   let searchTimer;
-  $("#search").onfocus = () => {
-    if (selectedId) closePanel();
-  };
   $("#search").oninput = () => {
     clearTimeout(searchTimer);
     const q = $("#search").value.trim(), box = $("#searchResults");
@@ -585,7 +684,7 @@
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=zh-CN&q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(6e3) });
         if (!res.ok) throw new Error();
         const data = await res.json();
-        if (data.length) showSearchResults(data);
+        if (data.length && $("#search").value.trim() === q && box.classList.contains("show")) showSearchResults(data);
       } catch (e) {
       }
     }, 300);
@@ -593,13 +692,17 @@
   $("#searchResults").onclick = (e) => {
     const b = e.target.closest("[data-result]");
     if (!b) return;
+    if (selectedId && !closePanel()) return;
     const r = JSON.parse($("#searchResults").dataset.items)[Number(b.dataset.result)];
     const point = { lat: Number(r.lat), lng: Number(r.lon) }, name = r.name || r.display_name.split(",")[0];
     $("#searchResults").classList.remove("show");
     $("#search").value = name;
+    regionSelection = {name, latlng:point};
+    pickingPoint = false;
+    refreshMapActions();
     map.stop();
     map.flyTo(point, Math.max(map.getZoom(), 9), motion());
-    askAdd(point, name);
+    $("#mapCaption").textContent = `${name} · 可记录到这里`;
   };
   document.addEventListener("click", (e) => {
     if (!e.target.closest(".search-wrap")) $("#searchResults").classList.remove("show");
@@ -627,6 +730,82 @@
     } catch (e) {
     }
   }
+  const backupDialog = $("#backupDialog"), backupStatus = $("#backupStatus");
+  let checkedBackup = null, backupBusy = false;
+  function setBackupBusy(busy) {
+    backupBusy = busy;
+    for (const selector of ["#backupClose","#backupDownload","#backupChoose"]) $(selector).disabled = busy;
+    $("#backupRestore").disabled = busy || !checkedBackup?.places.length;
+  }
+  function setBackupStatus(message, error = false) {
+    backupStatus.textContent = message;
+    backupStatus.classList.toggle("error", error);
+  }
+  $("#backupOpen").onclick = () => {
+    checkedBackup = null;
+    setBackupBusy(false);
+    setBackupStatus("");
+    backupDialog.showModal();
+  };
+  $("#backupClose").onclick = () => backupDialog.close();
+  backupDialog.oncancel = e => { if (backupBusy) e.preventDefault(); };
+  backupDialog.onclose = () => { checkedBackup = null; $("#backupFile").value = ""; };
+  $("#backupDownload").onclick = async () => {
+    setBackupBusy(true);
+    setBackupStatus("正在整理地点和照片…");
+    try {
+      const records = await allPlaces();
+      if (!records.length) { setBackupStatus("当前没有已保存的地点可备份。"); return; }
+      const blob = await makeBackup(records);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `家庭旅行地图-${new Date().toISOString().slice(0,10)}.travelmap`;
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      setBackupStatus(`已发起下载：${records.length} 个地点及其照片。请保留下载的文件。`);
+    } catch (e) {
+      setBackupStatus(e.message || "未能生成备份，原记录没有改动。", true);
+    } finally { setBackupBusy(false); }
+  };
+  $("#backupChoose").onclick = () => $("#backupFile").click();
+  $("#backupFile").onchange = async e => {
+    const file = e.target.files[0];
+    if (!file || backupBusy) return;
+    e.target.value = "";
+    checkedBackup = null;
+    setBackupBusy(true);
+    setBackupStatus("正在校验备份和照片，尚未写入…");
+    try {
+      checkedBackup = await readBackup(file);
+      setBackupStatus(checkedBackup.places.length ?
+        `校验通过：${checkedBackup.places.length} 个地点、${checkedBackup.photoCount} 张照片。确认后才会恢复。` :
+        "这是空备份，没有可恢复的地点。");
+    } catch (e) {
+      setBackupStatus(e.message || "无法读取备份，未写入任何记录。", true);
+    } finally { setBackupBusy(false); }
+  };
+  $("#backupRestore").onclick = async () => {
+    if (!checkedBackup || backupBusy) return;
+    setBackupBusy(true);
+    setBackupStatus("正在合并备份…");
+    let result, skipped;
+    try {
+      const plan = await planRestore(checkedBackup.places, await allPlaces());
+      result = await addBackupRecords(plan.additions);
+      skipped = plan.skipped + result.skipped;
+      checkedBackup = null;
+      places = await allPlaces();
+      render(true);
+      setBackupStatus(`恢复完成：新增 ${result.added} 个地点（含 ${result.copies} 个副本），跳过 ${skipped} 个已存在的地点。`);
+    } catch (e) {
+      setBackupStatus(result ? "备份已保存，但页面未能刷新。请重新加载地图。" :
+        (e?.name === "QuotaExceededError" ? "存储空间不足，本次恢复未写入任何记录。" :
+          "恢复未完成，原有记录没有被覆盖。请检查浏览器存储后重试。"), true);
+    } finally { setBackupBusy(false); }
+  };
   (async () => {
     try {
       let local = [];
@@ -660,6 +839,7 @@
       places = await allPlaces();
       if (migrated) notify("已保留原有旅行记录");
       render();
+      $("#backupOpen").disabled = false;
     } catch (e) {
       notify("本地数据暂时无法读取，请检查浏览器存储权限；原有记录仍保留", true);
     }

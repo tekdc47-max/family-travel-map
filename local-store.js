@@ -16,6 +16,26 @@ async function recordTransaction(action, write = false) {
     tx.onabort = () => reject(tx.error || new Error('保存未完成'));
   });
 }
+async function addBackupRecords(additions) {
+  let added = 0, copies = 0, skipped = 0;
+  // Queue all inserts in one transaction. Recheck keys inside the write lock:
+  // a tab that saved after backup validation must never be overwritten.
+  await recordTransaction(store => {
+    const keys = store.getAllKeys();
+    keys.onsuccess = () => {
+      const existing = new Set(keys.result);
+      for (const {row,copy} of additions) {
+        if (existing.has(row.id)) { skipped++; continue; }
+        store.add(row);
+        existing.add(row.id);
+        added++;
+        if (copy) copies++;
+      }
+    };
+    return keys;
+  }, true);
+  return {added,copies,skipped};
+}
 const centersReady = fetch('./region-centers.json').then(r => {if(!r.ok) throw Error('地区索引不可用');return r.json()});
 async function localApi(path, options = {}) {
   const method = options.method || 'GET';

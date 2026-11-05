@@ -1,0 +1,121 @@
+/* Only controls and floating surfaces get glass; the map and scrim stay sharp. */
+:root {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --glass: #f8fcfaee;
+  --glass-edge: #fff;
+  --glass-shadow: inset 0 1px 0 #fff, 0 1px 3px #193c4318, 0 7px 20px #193c4310;
+  --glass-blur: blur(14px) saturate(1.24);
+  --glass-ink: #274841;
+  --glass-muted: #4c665f;
+}
+.app {overflow:clip}
+.map-shell {isolation:isolate}
+.panel[aria-hidden="true"] {visibility:hidden}
+.map-hint[hidden] {display:none}
+.picking-point.leaflet-container,.picking-point.leaflet-container .leaflet-interactive {cursor:crosshair}
+.panel-actions {
+  flex:none;margin:0;padding:12px 24px;
+  border-top:1px solid #648a7725;background:#f8fcfaf2;
+}
+.panel-body {min-height:0}
+#addModal,#backupDialog {box-sizing:border-box;margin:auto;max-width:calc(100% - 28px);max-height:calc(100dvh - 32px);overflow:auto}
+#addModal::backdrop,#backupDialog::backdrop {background:#18383242}
+.rail-tools {display:flex;align-items:center;gap:8px}
+.backup-link {color:#116a5d;background:#edf6f2;border:0;border-radius:8px;padding:4px 8px;min-height:34px;font-size:12px;white-space:nowrap}
+.backup-heading {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.backup-download {width:100%}
+.backup-restore {border-top:1px solid #648a7740;margin-top:20px;padding-top:16px}
+.backup-restore h3 {margin:0;font-size:16px}
+.backup-restore .modal-actions {margin-top:12px;flex-wrap:wrap}
+.backup-restore .modal-actions button {flex:1;white-space:nowrap}
+#backupStatus {margin:12px 0 0}
+#backupStatus:empty {display:none}
+#backupStatus.error {color:#842b2b}
+#backupDialog button:disabled,.backup-link:disabled {opacity:.55;cursor:not-allowed}
+#addError {color:#842b2b}
+.toast {bottom:70px;max-width:calc(100% - 28px);width:max-content}
+.leaflet-control-attribution {
+  margin:0 12px 4px 0!important;
+  font-size:11px!important;
+}
+.search, .search-results, .map-caption, .map-hint, .pill-btn, .icon-btn,
+.panel, .modal, .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+  color: var(--glass-ink);
+}
+.search {
+  background: #eaf3ef;
+  border-color: #fff;
+  box-shadow: inset 0 1px 1px #23453e12, 0 0 0 1px #d9e7e1;
+}
+.search::placeholder, .search-icon, .map-caption span, .map-hint, .modal p,
+.brand p, .empty-list, .rail-foot, .photo-head span, .place-row small {
+  color: var(--glass-muted);
+}
+.search-icon {z-index:1;pointer-events:none}
+.panel {background:#f8fcfaed}
+.panel-head {border-color:#648a7725}
+.field input, .field textarea {
+  background:#ffffffde;
+  border-color:#a3bcb27d;
+  color:var(--glass-ink);
+}
+.field input::placeholder, .field textarea::placeholder {color:#506962}
+.modal-backdrop {background:#18383242;backdrop-filter:none}
+.pill-btn.primary {
+  background:#116a5def;
+  color:#fff;
+  border-color:#ffffffbf;
+  box-shadow:inset 0 1px 1px #ffffff5e, 0 5px 14px #164e3e30;
+}
+.pill-btn.primary:hover {background:#0d5c50}
+.save-btn {background:#116a5d}
+.save-btn:hover {background:#0d5c50}
+.panel-close,.cancel-btn {
+  background:#edf6f2;
+  color:#24473e;
+  border:1px solid #fff;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px #193c4316;
+}
+.leaflet-bar {
+  background:var(--glass);
+  border:1px solid var(--glass-edge)!important;
+  box-shadow:var(--glass-shadow)!important;
+}
+.leaflet-bar a {background:transparent}
+.leaflet-bar a:hover {background:#fff9}
+.leaflet-bar a.leaflet-disabled {background:#e7f1ed80;color:#4c665f!important}
+.leaflet-bar a:focus-visible {outline:2px solid #146b5b;outline-offset:-3px}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .map-caption,.map-hint,.map-actions button,.panel,.modal,.leaflet-bar,.search-results {
+    -webkit-backdrop-filter:var(--glass-blur);
+    backdrop-filter:var(--glass-blur);
+  }
+  .map-caption,.map-hint,.icon-btn,.leaflet-bar {background:#f8fffcaa}
+  .panel {background:#f8fcfae0}
+}
+@media(max-width:760px) {
+  :root {--glass-blur:blur(7px) saturate(1.12)}
+  .rail {background:#f8fcfaee;border-color:#fff;box-shadow:var(--glass-shadow)}
+  .panel,.modal {background:#f8fcfaf9}
+  .panel,.modal,.search-results {backdrop-filter:none;-webkit-backdrop-filter:none}
+  .leaflet-bar a {width:44px!important;height:44px!important;line-height:44px!important}
+  .panel-close {width:44px;height:44px}
+  .backup-link {min-height:44px}
+  .rail {max-height:44dvh}
+  .place-list:has(.empty-list) {max-height:none}
+  .panel {height:min(58dvh,670px)}
+  .panel-actions {padding:10px 18px max(10px,env(safe-area-inset-bottom))}
+  .leaflet-control-zoom {margin-bottom:128px!important}
+  .toast {bottom:136px}
+}
+@media(prefers-reduced-transparency:reduce) {
+  :root {--glass-blur:none;--glass:#f8fcfa}
+  .rail,.panel,.modal,.map-caption,.map-hint,.icon-btn,.leaflet-bar {background:#f8fcfa}
+  .rail {backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media(prefers-reduced-motion:reduce) {
+  .photo-card:hover img,.pill-btn:hover,.icon-btn:hover {transform:none}
+}
