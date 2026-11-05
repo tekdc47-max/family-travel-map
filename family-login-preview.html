@@ -77,12 +77,20 @@
   
   <section id="cloudLogin" class="modal" aria-labelledby="cloudTitle" style="position:fixed;inset:0;margin:auto;width:min(420px,calc(100% - 32px));height:max-content;z-index:2100">
     <h2 id="cloudTitle">家庭旅行地图</h2>
-    <p>请使用受邀的邮箱登录，查看一家人的旅行足迹。</p>
-    <form>
-      <div class="field"><label for="familyEmail">邮箱</label><input id="familyEmail" name="email" type="email" autocomplete="email" required></div>
-      <button class="save-btn" type="submit">发送登录链接</button>
-      <p role="status" aria-live="polite">正在检查登录状态…</p>
+    <p>使用管理员发给你的账号登录，查看一家人的旅行足迹。</p>
+    <form id="familyPasswordLogin" method="post">
+      <div class="field"><label for="familyUsername">用户名</label><input id="familyUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required></div>
+      <div class="field"><label for="familyPassword">密码</label><input id="familyPassword" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="save-btn" type="submit" disabled>登录</button>
     </form>
+    <details style="margin-top:16px">
+      <summary>原有账号用邮箱登录</summary>
+      <form id="familyEmailLogin" method="post">
+        <div class="field"><label for="familyEmail">邮箱</label><input id="familyEmail" name="email" type="email" autocomplete="email" required></div>
+        <button class="save-btn" type="submit" disabled>发送登录链接</button>
+      </form>
+    </details>
+    <p role="status" aria-live="polite">正在检查登录状态…</p>
     <noscript>需要启用 JavaScript 才能登录。</noscript>
   </section>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -90,13 +98,12 @@
   <script src="./family-preview-supabase.js"></script>
   <script type="module">
   import {labelShape, labelFits} from "./region-labels.js";
-  import {connectFamilyMap} from './family-preview-cloud.js';
+  import {connectFamilyMap} from './family-preview-cloud-v2.js';
   const login = document.getElementById('cloudLogin');
   const loginStatus = login.querySelector('[role=status]');
   const publicKey = "sb_publishable_Q9QyR_4MxvnR4jQhRmH47A_Kttc7i7p";
   let cloud;
   if (!publicKey) {
-    login.querySelector('button').disabled = true;
     loginStatus.textContent = '这是独立预览，尚未配置云端连接。';
   } else {
     try {
@@ -105,7 +112,6 @@
       cloud = await connectFamilyMap(client, login);
       if (!cloud && loginStatus.textContent === '正在检查登录状态…') loginStatus.textContent = '';
     } catch {
-      login.querySelector('button').disabled = true;
       loginStatus.textContent = '登录服务暂不可用，请稍后重试。';
     }
   }
