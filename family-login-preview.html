@@ -50,7 +50,7 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
-  <link rel="stylesheet" href="./family-glass-2eb1d0da42.css">
+  <link rel="stylesheet" href="./family-glass-71521f4d2b.css">
 </head>
 <body>
   <main class="app" id="cloudMap" style="visibility:hidden" inert>
@@ -124,7 +124,7 @@
   <script type="module">
   import {labelShape, labelFits} from "./region-labels.js";
   import {applyGlassRefraction} from "./family-glass-refraction-c70d086660.js";
-  import {connectFamilyMap} from './family-cloud-9e25292413.js';
+  import {connectFamilyMap} from './family-cloud-3916f37072.js';
   const login = document.getElementById('cloudLogin');
   const loginStatus = login.querySelector('[role=status]');
   const publicKey = "sb_publishable_Q9QyR_4MxvnR4jQhRmH47A_Kttc7i7p";
@@ -371,10 +371,15 @@
     }
     layoutZoom = map.getZoom();
   }
-  // Labels are laid out once, after the map has come to rest. Laying them out on every
-  // animation frame meant creating and destroying markers 60 times a second, which is
-  // what made zooming feel sticky. While zooming, the existing labels just scale with
-  // the map through one inherited CSS variable.
+  // Panning reveals new names without waiting for pointer-up. Leave zoom animation
+  // to the existing marker transforms, then do a final layout when the camera stops.
+  let lastPanLabels = -Infinity;
+  map.on("move", () => {
+    const now = performance.now();
+    if (document.body.classList.contains("is-zooming") || now - lastPanLabels < 80) return;
+    lastPanLabels = now;
+    updateRegionNames();
+  });
   map.on("zoomend moveend resize", updateRegionNames);
   // The scale variable is scoped to the marker pane, not :root, so a zoom step only
   // invalidates the few label boxes instead of the whole document. Short zoom steps
@@ -574,9 +579,12 @@
   loadWorldMap();
   const api = cloud.api;
   function allPlaces() {
-    return api("/api/places");
+    return api("/api/places?focus=" + encodeURIComponent(selectedId || ""));
   }
-  function saveRecord(p) {
+  function saveRecord(p, base) {
+    if (base) return api("/api/places/" + encodeURIComponent(p.id), {
+      method: "PATCH", body: JSON.stringify({values:p,base})
+    });
     const { photos, ...place } = p;
     return api("/api/places", { method: "PUT", body: JSON.stringify(place) });
   }
@@ -633,6 +641,7 @@
     }
   }
   const detailFields = {name:"#placeName", date:"#placeDate", intro:"#placeIntro", memory:"#placeMemory"};
+  let detailBaseline = {};
   let shownGallery = null;
   function clearGallery() {
     $("#photoGrid").replaceChildren();
@@ -651,11 +660,18 @@
         src = URL.createObjectURL(photo.blob);
         urls.push(src);
       }
-      return `<div class="photo-card"><img src="${esc(src)}" alt="${esc(p.name || "\u65C5\u884C")}\u7167\u7247 ${i + 1}" loading="lazy" decoding="async"><button class="photo-remove" data-photo="${i}" aria-label="\u5220\u9664\u8FD9\u5F20\u7167\u7247">\xD7</button></div>`;
+      const image = src ? `<img src="${esc(src)}" alt="${esc(p.name || "\u65C5\u884C")}\u7167\u7247 ${i + 1}" loading="lazy" decoding="async">` : '<span class="photo-pending">正在加载照片…</span>';
+      return `<div class="photo-card">${image}<button class="photo-remove" data-photo="${i}" aria-label="\u5220\u9664\u8FD9\u5F20\u7167\u7247">\xD7</button></div>`;
     }).join("") + '<button class="add-photo" id="addPhoto"><span>\uFF0B</span><span>\u6DFB\u52A0\u7167\u7247</span></button>';
   }
   function fillPanel(p, keepFields = false) {
-    if (!keepFields) for (const [key, field] of Object.entries(detailFields)) $(field).value = p[key] || "";
+    for (const [key, field] of Object.entries(detailFields)) {
+      const input = $(field), value = p[key] || "";
+      if (!keepFields || input.value === detailBaseline[key] || input.value === value) {
+        input.value = value;
+        detailBaseline[key] = value;
+      }
+    }
     renderGallery(p);
     $("#panelTitle").textContent = p.name || "\u672A\u547D\u540D\u5730\u70B9";
     $("#deletePlace").style.display = p.id === "draft" ? "none" : "block";
@@ -667,9 +683,11 @@
     settleMaterial(el, 340, updateRegionNames);
     updateRegionNames();
   }
+  function hasUnsavedDetails() {
+    return selectedId && Object.entries(detailFields).some(([key, field]) => $(field).value !== detailBaseline[key]);
+  }
   function canLeaveDetails() {
-    const p = places.find(x => x.id === selectedId);
-    return !p || !Object.entries(detailFields).some(([key, field]) => $(field).value !== (p[key] || "")) ||
+    return !hasUnsavedDetails() ||
       window.confirm("有未保存的修改。要放弃这些修改吗？");
   }
   function closePanel(force = false) {
@@ -681,6 +699,7 @@
     syncForeground();
     clearGallery();
     selectedId = null;
+    detailBaseline = {};
     render();
     return true;
   }
@@ -689,6 +708,7 @@
     if (!canLeaveDetails()) return;
     selectedId = placeId;
     render();
+    refreshCloud(true);
     openPanel();
     const p = places.find((x) => x.id === placeId);
     if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) map.panTo([p.lat, p.lng], motion(0.45));
@@ -761,16 +781,18 @@
   };
   $("#savePlace").onclick = async () => {
     const p = places.find((x) => x.id === selectedId);
-    if (!p) return;
+    if (!p) { notify("该地点已在其他设备上删除。", true); return; }
     const updated = {...p, ...Object.fromEntries(Object.entries(detailFields).map(([key, field]) => [key, $(field).value.trim()]))};
     updated.name ||= "未命名地点";
     try {
-      await saveRecord(updated);
+      await saveRecord(updated, detailBaseline);
+      if (selectedId === p.id) detailBaseline = Object.fromEntries(Object.keys(detailFields).map(key => [key, updated[key]]));
       Object.assign(p, updated);
-      render(selectedId !== p.id);
+      render(true);
+      refreshCloud(true);
       notify("\u65C5\u884C\u8BB0\u5F55\u5DF2\u4FDD\u5B58\uFF0C\u6240\u5728\u533A\u57DF\u5DF2\u70B9\u4EAE \u2728");
     } catch (e) {
-      notify("\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
+      notify(e?.code === "FAMILY_MAP_CONFLICT" ? e.message : "\u4FDD\u5B58\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6D4F\u89C8\u5668\u5B58\u50A8\u7A7A\u95F4", true);
     }
   };
   $("#deletePlace").onclick = async () => {
@@ -816,7 +838,6 @@
     let photoError = skipped ? "只支持添加图片文件。" : "";
     e.target.disabled = true;
     try {
-      if (allowed.length) await saveRecord(p);
       for (const f of allowed) {
         const form = new FormData();
         form.append("file", f);
@@ -895,16 +916,42 @@
     if (e.key === "Escape") $("#searchResults").classList.remove("show");
     if (e.key === "Enter") $("#searchResults").querySelector("[data-result]")?.click();
   };
-  async function refreshCloud() {
+  let refreshing = false, refreshAgain = false, syncFailed = false;
+  async function refreshCloud(immediate = false) {
+    if (document.hidden || navigator.onLine === false || cloud.pendingWrites) return;
+    if (refreshing) { refreshAgain ||= immediate; return; }
+    refreshing = true;
+    const version = cloud.writeVersion, focus = selectedId;
     try {
-      places = await allPlaces();
-      if (selectedId && !places.some(p => p.id === selectedId)) closePanel(true);
+      const next = await allPlaces();
+      if (cloud.writeVersion !== version || selectedId !== focus) {
+        refreshAgain = true;
+        return;
+      }
+      syncFailed = false;
+      const previous = new Map(places.map(p => [p.id, p]));
+      if (next.length === previous.size && next.every(p => JSON.stringify(p) === JSON.stringify(previous.get(p.id)))) return;
+      places = next;
+      if (focus && !next.some(p => p.id === focus)) {
+        if (!hasUnsavedDetails()) { closePanel(true); return; }
+        if (previous.has(focus)) notify('此地点已在其他设备删除，当前输入暂时保留。', true);
+      }
       render(true);
-    } catch { notify('共享记录暂时无法读取，请刷新重试。', true); }
+    } catch {
+      if (!syncFailed) notify('共享地图暂时无法同步，连接恢复后会重试。', true);
+      syncFailed = true;
+    } finally {
+      refreshing = false;
+      if (refreshAgain) { refreshAgain = false; refreshCloud(true); }
+    }
   }
-  refreshCloud();
-  // Refresh open views without overwriting any unsaved editor fields.
-  setInterval(() => { if (!document.hidden && !cloud.canEdit) refreshCloud(); }, 60000);
+  const syncNow = () => refreshCloud(true);
+  syncNow();
+  try { cloud.watch(syncNow); } catch {}
+  setInterval(refreshCloud, 6000);
+  addEventListener('focus', syncNow);
+  addEventListener('online', syncNow);
+  document.addEventListener('visibilitychange', syncNow);
 })();
   }
   </script>
