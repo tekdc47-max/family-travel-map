@@ -57,7 +57,7 @@
     <aside class="rail" aria-label="旅行地点">
       <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.6 7-12A7 7 0 1 0 5 9c0 6.4 7 12 7 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" fill="currentColor"/></svg></div><div><h1>我们的旅行地图</h1><p>把一起走过的路，留在这里</p></div></div>
       <div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" class="search" placeholder="搜索城市或地区" autocomplete="off" aria-label="搜索城市或地区"><div id="searchResults" class="search-results" role="group" aria-label="搜索结果"></div></div>
-      <div class="section-head"><h2>旅行足迹</h2><div class="rail-tools"><span id="placeCount" class="count">0 个地点</span><button id="cloudSignOut" class="backup-link">退出登录</button></div></div>
+      <div class="section-head"><h2>旅行足迹</h2><div class="rail-tools"><span id="placeCount" class="count">0 个地点</span><button id="accountAdminOpen" class="backup-link" hidden>账号管理</button><button id="cloudSignOut" class="backup-link">退出登录</button></div></div>
       <div id="placeList" class="place-list"><div class="empty-list">还没有旅行足迹。<br>搜索一座城市，或在地图上点一下，收藏你们一起去过的地方。</div></div>
       <div class="rail-foot" id="cloudRole">家庭共享 · 私密访问</div>
     </aside>
@@ -97,6 +97,37 @@
     <p role="status" aria-live="polite">正在检查登录状态…</p>
     <noscript>需要启用 JavaScript 才能登录。</noscript>
   </section>
+  <dialog id="accountAdminDialog" class="modal" aria-labelledby="accountAdminTitle">
+    <h2 id="accountAdminTitle">家庭账号管理</h2>
+    <div class="field"><label for="accountAdminTarget">共享成员</label><select id="accountAdminTarget"></select></div>
+    <form id="accountAdminForm" method="post" autocomplete="off" hidden>
+      <div class="field" data-account-role><label for="accountAdminRole">地图权限</label>
+        <select id="accountAdminRole" name="role"><option value="viewer">仅观看</option><option value="editor">可编辑</option></select>
+      </div>
+      <div data-account-credentials>
+        <div class="field"><label for="accountAdminUsername">用户名</label>
+          <input id="accountAdminUsername" name="username" maxlength="32" autocapitalize="none" spellcheck="false">
+        </div>
+        <div class="field"><label for="accountAdminPassword">新密码</label>
+          <input id="accountAdminPassword" name="password" type="password" autocomplete="new-password" maxlength="72" placeholder="至少 6 位">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="save-btn" value="create" hidden>创建账号</button>
+        <button class="save-btn" value="role" hidden>保存权限</button>
+        <button class="cancel-btn" value="credentials" hidden>保存登录信息</button>
+        <button class="delete-btn" value="remove" hidden>撤销访问</button>
+      </div>
+    </form>
+    <p role="status" aria-live="polite"></p>
+    <div class="modal-actions"><button id="accountAdminClose" class="cancel-btn" type="button">关闭</button></div>
+  </dialog>
+  <style>
+    #accountAdminDialog{max-height:calc(100dvh - 32px);overflow:auto}
+    #accountAdminDialog select{width:100%;padding:10px 12px;font:inherit;font-size:16px;color:inherit;background:#f8fcfa;border:1px solid #a9c5bb;border-radius:12px}
+    #accountAdminDialog .modal-actions{flex-wrap:wrap}
+    #accountAdminDialog [hidden],#accountAdminOpen[hidden]{display:none!important}
+  </style>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
     (() => {
@@ -125,6 +156,7 @@
   import {labelShape, labelFits} from "./region-labels.js";
   import {applyGlassRefraction} from "./family-glass-refraction-c70d086660.js";
   import {connectFamilyMap} from './family-cloud-3916f37072.js';
+  import {mountAccountAdmin} from './family-account-admin-31cff593af.js';
   const login = document.getElementById('cloudLogin');
   const loginStatus = login.querySelector('[role=status]');
   const publicKey = "sb_publishable_Q9QyR_4MxvnR4jQhRmH47A_Kttc7i7p";
@@ -136,6 +168,7 @@
       const {createClient} = globalThis.supabase;
       const client = createClient('https://qwtjczdsggctnvbtwxnr.supabase.co', publicKey, {auth:{storageKey:'family-map-cloud-auth-v1'}});
       cloud = await connectFamilyMap(client, login);
+      if (cloud?.canEdit) mountAccountAdmin(client).catch(() => {});
       if (!cloud && loginStatus.textContent === '正在检查登录状态…') loginStatus.textContent = '';
     } catch {
       loginStatus.textContent = '登录服务暂不可用，请稍后重试。';
