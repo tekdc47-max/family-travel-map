@@ -50,7 +50,7 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
-  <link rel="stylesheet" href="./glass.css">
+  <link rel="stylesheet" href="./family-glass-2eb1d0da42.css">
 </head>
 <body>
   <main class="app" id="cloudMap" style="visibility:hidden" inert>
@@ -62,6 +62,10 @@
       <div class="rail-foot" id="cloudRole">家庭共享 · 私密访问</div>
     </aside>
     <section class="map-shell" aria-label="世界旅行地图"><div id="map" class="map"></div>
+      <div id="mapStatus" class="map-status">
+        <p id="mapStatusText" role="status">正在加载地图…</p>
+        <button id="mapRetry" class="save-btn" type="button" hidden>重试</button>
+      </div>
       <div class="map-top"><div class="map-caption"><b>一家人的世界足迹</b><span id="mapCaption">每一枚标记，都是一段共同回忆</span></div><div class="map-actions"><button id="locateBtn" class="icon-btn" title="回到地图总览" aria-label="回到地图总览"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button><button id="addBtn" class="pill-btn primary"><span aria-hidden="true">＋</span> <span id="addLabel">添加地点</span></button></div></div>
       <div class="map-hint">点地区平滑放大 · 点“添加地点”记录旅程</div>
     </section>
@@ -94,11 +98,33 @@
     <noscript>需要启用 JavaScript 才能登录。</noscript>
   </section>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      const text = document.getElementById("mapStatusText");
+      const retry = document.getElementById("mapRetry");
+      const login = document.getElementById("cloudLogin");
+      const status = () => login && !login.hidden ? login.querySelector('[role="status"]') : text;
+      if (location.protocol === "file:") {
+        status().textContent = "请通过网站或本地预览地址打开地图。直接双击文件时，浏览器无法读取地图数据。";
+        return;
+      }
+      retry.onclick = () => location.reload();
+      document.addEventListener("error", event => {
+        const script = event.target;
+        if (!(script instanceof HTMLScriptElement) ||
+            (script.type !== "module" && script.getAttribute("src") !== "./leaflet.js")) return;
+        const message = "页面组件加载失败，请检查网络后刷新页面。";
+        text.textContent = status().textContent = message;
+        retry.hidden = false;
+      }, true);
+    })();
+  </script>
   <script src="./leaflet.js" crossorigin=""></script>
   <script src="./family-preview-supabase.js"></script>
   <script type="module">
   import {labelShape, labelFits} from "./region-labels.js";
-  import {connectFamilyMap} from './family-preview-cloud-v2.js';
+  import {applyGlassRefraction} from "./family-glass-refraction-c70d086660.js";
+  import {connectFamilyMap} from './family-cloud-9e25292413.js';
   const login = document.getElementById('cloudLogin');
   const loginStatus = login.querySelector('[role=status]');
   const publicKey = "sb_publishable_Q9QyR_4MxvnR4jQhRmH47A_Kttc7i7p";
@@ -136,9 +162,43 @@
   let places = [], markers = /* @__PURE__ */ new Map(), selectedId = null, pendingPoint = null, toastTimer;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const homeCenter = () => window.innerWidth <= 760 ? [31, 105] : [24, 8];
-  const map = L.map("map", { zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: true, zoomAnimation: !reducedMotion.matches, inertia: !reducedMotion.matches }).setView(homeCenter(), 2);
+  const map = L.map("map", {
+    zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: true,
+    zoomAnimation: !reducedMotion.matches, inertia: !reducedMotion.matches,
+    // Continuous zoom: the wheel no longer snaps between whole levels.
+    zoomSnap: 0.15, wheelPxPerZoomLevel: 100, wheelDebounceTime: 25,
+    inertiaDeceleration: 2800, inertiaMaxSpeed: 1600, easeLinearity: 0.2
+  }).setView(homeCenter(), 2);
   reducedMotion.addEventListener("change", () => { map.options.inertia = !reducedMotion.matches; });
   L.control.zoom({ position: "bottomright" }).addTo(map);
+  // Motion bus: live blur over a moving map is what makes panning stutter, so the
+  // material is dropped for the duration of the gesture and restored once it settles.
+  let idleTimer = 0;
+  const setMoving = (on) => {
+    document.body.classList.toggle("is-map-moving", on);
+    if (!on) document.body.classList.remove("is-zooming");
+  };
+  map.on("movestart zoomstart", () => { clearTimeout(idleTimer); setMoving(true); });
+  map.on("zoomstart", () => document.body.classList.add("is-zooming"));
+  const settleMotion = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => setMoving(false), 110); };
+  map.on("moveend zoomend resize", settleMotion);
+  // A surface only gets its backdrop filter once it has finished sliding in.
+  const syncForeground = () => document.body.classList.toggle("has-foreground", !!document.querySelector(".panel.open,dialog[open]"));
+  const settleMaterial = (el, delay, onSettled) => {
+    syncForeground();
+    el.classList.remove("settled");
+    clearTimeout(el.settleTimer);
+    el.settleTimer = setTimeout(() => {
+      el.classList.add("settled");
+      onSettled?.();
+    }, delay);
+  };
+  document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("close", () => {
+    clearTimeout(dialog.settleTimer);
+    dialog.classList.remove("settled");
+    syncForeground();
+  }));
+  applyGlassRefraction(document.querySelectorAll(".map-actions button,.leaflet-control-zoom"));
   map.attributionControl.addAttribution('World boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>');
   for (const [name, order] of [["countries", 400], ["administrative", 410], ["cities", 420]]) {
     map.createPane(name).style.zIndex = order;
@@ -180,10 +240,15 @@
     if (lit && !hidden) layer.bringToFront();
   }
   function renderVisitedRegions() {
-    visitSignature = places.map((p) => `${p.id}:${p.lat}:${p.lng}`).sort().join("|");
-    countryLayer.eachLayer(paintRegion);
-    adminLayer.eachLayer(paintRegion);
-    cityLayer.eachLayer(paintRegion);
+    // Repainting 200+ paths (and re-appending them with bringToFront) costs a full
+    // style recalc. Only do it when the set of visited coordinates actually changed.
+    const next = places.map((p) => `${p.id}:${p.lat}:${p.lng}`).sort().join("|");
+    if (next !== visitSignature) {
+      visitSignature = next;
+      countryLayer.eachLayer(paintRegion);
+      adminLayer.eachLayer(paintRegion);
+      cityLayer.eachLayer(paintRegion);
+    }
     updateRegionNames();
   }
   let regionSelection = null, regionRevision = 0, pickingPoint = false;
@@ -191,7 +256,7 @@
   function regionName(p) {
     return p.name || adminCountryNames[p.ADM0_A3] || p.NAME_ZH || p.NAME || p.name_en || p.ADMIN || "";
   }
-  let hiddenCountry = null, hiddenProvince = null, labelFrame = 0;
+  let hiddenCountry = null, hiddenProvince = null, labelFrame = 0, layoutZoom = map.getZoom();
   const namePoints = new WeakMap(), nameMarkers = new Map();
   const measure = document.createElement("canvas").getContext("2d");
   const widths = new Map();
@@ -240,7 +305,7 @@
     const layers = [...cityLayer.getLayers(), ...adminLayer.getLayers(), ...countryLayer.getLayers()];
     const scale = map.getZoomScale(targetZoom, 0), size = map.getSize(), view = map.getContainer().getBoundingClientRect();
     const origin = map.project(targetCenter, targetZoom).subtract(size.divideBy(2));
-    const chrome = [...document.querySelectorAll(".rail,.map-caption,.map-actions,.map-hint,.leaflet-control-zoom")]
+    const chrome = [...document.querySelectorAll(".rail,.map-caption,.map-actions,.map-hint,.leaflet-control-zoom,.panel.open")]
       .map(el => el.getBoundingClientRect()).filter(r => r.width && r.height)
       .map(r => ({left:r.left-view.left, right:r.right-view.left, top:r.top-view.top, bottom:r.bottom-view.top}));
     const candidates = [];
@@ -304,11 +369,39 @@
     for (const [layer, marker] of nameMarkers) {
       if (!visible.has(layer)) { marker.remove(); nameMarkers.delete(layer); }
     }
+    layoutZoom = map.getZoom();
   }
-  map.on("zoom moveend resize", updateRegionNames);
-  // During a CSS zoom-out, discard labels that won't fit at the smaller scale
-  // before Leaflet animates their positions. Fly-to uses live zoom events instead.
-  map.on("zoomanim", ({zoom, center}) => { if (zoom < map.getZoom()) layoutNames(zoom, center, true); });
+  // Labels are laid out once, after the map has come to rest. Laying them out on every
+  // animation frame meant creating and destroying markers 60 times a second, which is
+  // what made zooming feel sticky. While zooming, the existing labels just scale with
+  // the map through one inherited CSS variable.
+  map.on("zoomend moveend resize", updateRegionNames);
+  // The scale variable is scoped to the marker pane, not :root, so a zoom step only
+  // invalidates the few label boxes instead of the whole document. Short zoom steps
+  // scale the existing labels with the map; a long flight fades them out and lets the
+  // post-flight layout drop them back in, which is what big map apps do.
+  const labelPane = map.getPane("markerPane");
+  let labelScale = 1, labelOpacity = 1;
+  function onZoomFrame(zoom) {
+    const delta = zoom - layoutZoom;
+    const jump = Math.abs(delta) > 1;
+    const scale = jump ? 1 : Math.min(1.25, Math.max(0.8, 2 ** delta));
+    const opacity = jump ? 0 : 1;
+    if (Math.abs(scale - labelScale) < 0.004 && opacity === labelOpacity) return;
+    labelScale = scale;
+    labelOpacity = opacity;
+    labelPane.style.setProperty("--label-scale", scale.toFixed(4));
+    labelPane.style.setProperty("--label-opacity", String(opacity));
+  }
+  map.on("zoomanim", (e) => onZoomFrame(e.zoom));
+  map.on("move", () => onZoomFrame(map.getZoom()));
+  map.on("zoomend", () => {
+    labelPane.style.setProperty("--label-ms", "0ms");
+    labelScale = 1; labelOpacity = 1;
+    labelPane.style.setProperty("--label-scale", "1");
+    labelPane.style.setProperty("--label-opacity", "1");
+    requestAnimationFrame(() => labelPane.style.setProperty("--label-ms", "240ms"));
+  });
   function clearCities() {
     cityLayer.clearLayers();
     const previous = hiddenProvince;
@@ -380,8 +473,16 @@
   } }).addTo(map);
   const chinaData = new Map();
   function chinaBoundaries(code) {
-    if (!chinaData.has(code)) chinaData.set(code, api(`/api/regions/${code}`).catch((e) => { chinaData.delete(code); throw e; }));
-    return chinaData.get(code);
+    const cached = chinaData.get(code);
+    const request = cached || api(`/api/regions/${code}`).catch(error => {
+      if (chinaData.get(code) === request) chinaData.delete(code);
+      throw error;
+    });
+    chinaData.delete(code);
+    chinaData.set(code, request);
+    // Keep only recently used geometry. The active Leaflet layers hold their own references.
+    if (chinaData.size > 3) chinaData.delete(chinaData.keys().next().value);
+    return request;
   }
   async function showChinaCities(province, revision) {
     try {
@@ -392,6 +493,7 @@
       if (!features.length) throw Error("没有市级边界");
       cityLayer.addData({ type: "FeatureCollection", features });
       hiddenProvince = province;
+      paintRegion(province);
       renderVisitedRegions();
       $("#mapCaption").textContent = `${province.feature.properties.name} · 点击城市／区继续放大`;
       notify("市／区地图已载入，点击地区可放大并记录旅行");
@@ -408,6 +510,7 @@
         if (revision !== regionRevision) return;
         adminLayer.addData({ type: "FeatureCollection", features: data.features.filter((f) => f.properties?.name) });
         hiddenCountry = country;
+        paintRegion(country);
         renderVisitedRegions();
         $("#mapCaption").textContent = "中国 · 点击省份查看市级地图";
         notify("点击省份进入市级地图；直辖市按区展示");
@@ -428,6 +531,7 @@
       adminLayer.clearLayers();
       adminLayer.addData({ type: "FeatureCollection", features });
       hiddenCountry = country;
+      paintRegion(country);
       renderVisitedRegions();
       $("#mapCaption").textContent = `${adminCountryNames[countryCode]} · 点击省／州继续放大`;
       refreshMapActions();
@@ -449,10 +553,25 @@
     refreshMapActions();
     map.flyTo(homeCenter(), 2, motion());
   }
-  fetch("world.geojson").then((r) => {
-    if (!r.ok) throw Error("Map data unavailable");
-    return r.json();
-  }).then((data) => { countryLayer.addData(data); renderVisitedRegions(); }).catch(() => notify("\u4E16\u754C\u8F6E\u5ED3\u52A0\u8F7D\u5931\u8D25\uFF0C\u53EF\u5237\u65B0\u9875\u9762\u91CD\u8BD5", true));
+  async function loadWorldMap() {
+    $("#mapRetry").hidden = true;
+    $("#mapStatusText").textContent = "正在加载地图…";
+    try {
+      const response = await fetch("./family-world-f7d02dca23.geojson");
+      if (!response.ok) throw Error("Map data unavailable");
+      const data = await response.json();
+      if (!data.features?.length) throw Error("No country boundaries");
+      countryLayer.addData(data);
+      renderVisitedRegions();
+      $("#mapStatus").hidden = true;
+    } catch {
+      countryLayer.clearLayers();
+      $("#mapStatusText").textContent = "地图加载失败，请检查网络后重试。";
+      $("#mapRetry").hidden = false;
+    }
+  }
+  $("#mapRetry").onclick = loadWorldMap;
+  loadWorldMap();
   const api = cloud.api;
   function allPlaces() {
     return api("/api/places");
@@ -495,7 +614,8 @@
       if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return;
       let m = markers.get(p.id);
       if (!m) {
-        m = L.marker([p.lat, p.lng], { icon: markerIcon(p.id === selectedId) }).addTo(map).on("click", () => selectPlace(p.id));
+        const placeId = p.id;
+        m = L.marker([p.lat, p.lng], { icon: markerIcon(placeId === selectedId) }).addTo(map).on("click", () => selectPlace(placeId));
         markers.set(p.id, m);
       } else {
         if (!m.getLatLng().equals([p.lat, p.lng])) m.setLatLng([p.lat, p.lng]);
@@ -513,13 +633,30 @@
     }
   }
   const detailFields = {name:"#placeName", date:"#placeDate", intro:"#placeIntro", memory:"#placeMemory"};
-  function fillPanel(p, keepFields = false) {
-    if (!keepFields) for (const [key, field] of Object.entries(detailFields)) $(field).value = p[key] || "";
+  let shownGallery = null;
+  function clearGallery() {
+    $("#photoGrid").replaceChildren();
+    for (const url of shownGallery?.urls || []) URL.revokeObjectURL(url);
+    shownGallery = null;
+  }
+  function renderGallery(p) {
+    if (shownGallery && shownGallery.photos === p.photos && shownGallery.name === p.name) return;
+    clearGallery();
+    const urls = [];
+    shownGallery = {photos:p.photos, name:p.name, urls};
     $("#photoCount").textContent = (p.photos || []).length + " \u5F20";
     $("#photoGrid").innerHTML = (p.photos || []).map((photo, i) => {
-      const src = typeof photo === "string" ? photo : photo.url;
-      return `<div class="photo-card"><img src="${esc(src)}" alt="${esc(p.name || "\u65C5\u884C")}\u7167\u7247 ${i + 1}" loading="lazy"><button class="photo-remove" data-photo="${i}" aria-label="\u5220\u9664\u8FD9\u5F20\u7167\u7247">\xD7</button></div>`;
+      let src = typeof photo === "string" ? photo : photo.url;
+      if (photo?.blob instanceof Blob) {
+        src = URL.createObjectURL(photo.blob);
+        urls.push(src);
+      }
+      return `<div class="photo-card"><img src="${esc(src)}" alt="${esc(p.name || "\u65C5\u884C")}\u7167\u7247 ${i + 1}" loading="lazy" decoding="async"><button class="photo-remove" data-photo="${i}" aria-label="\u5220\u9664\u8FD9\u5F20\u7167\u7247">\xD7</button></div>`;
     }).join("") + '<button class="add-photo" id="addPhoto"><span>\uFF0B</span><span>\u6DFB\u52A0\u7167\u7247</span></button>';
+  }
+  function fillPanel(p, keepFields = false) {
+    if (!keepFields) for (const [key, field] of Object.entries(detailFields)) $(field).value = p[key] || "";
+    renderGallery(p);
     $("#panelTitle").textContent = p.name || "\u672A\u547D\u540D\u5730\u70B9";
     $("#deletePlace").style.display = p.id === "draft" ? "none" : "block";
   }
@@ -527,6 +664,8 @@
     const el = $("#detailPanel");
     el.classList.add("open");
     el.setAttribute("aria-hidden", "false");
+    settleMaterial(el, 340, updateRegionNames);
+    updateRegionNames();
   }
   function canLeaveDetails() {
     const p = places.find(x => x.id === selectedId);
@@ -536,8 +675,11 @@
   function closePanel(force = false) {
     if (!force && !canLeaveDetails()) return false;
     const el = $("#detailPanel");
-    el.classList.remove("open");
+    clearTimeout(el.settleTimer);
+    el.classList.remove("open", "settled");
     el.setAttribute("aria-hidden", "true");
+    syncForeground();
+    clearGallery();
     selectedId = null;
     render();
     return true;
@@ -570,6 +712,7 @@
     $("#newDate").value = "";
     $("#addError").hidden = true;
     $("#addModal").showModal();
+    settleMaterial($("#addModal"), 300);
   }
   map.on("click", (e) => askAdd(e.latlng));
   $("#addBtn").onclick = () => {
@@ -651,11 +794,12 @@
     }
     const b = e.target.closest("[data-photo]");
     if (b) {
-      const p = places.find((x) => x.id === selectedId), photo = p?.photos?.[Number(b.dataset.photo)];
+      const index = Number(b.dataset.photo);
+      const p = places.find((x) => x.id === selectedId), photo = p?.photos?.[index];
       if (!p || !photo) return;
       try {
         await api(`/api/photos/${encodeURIComponent(p.id)}/${encodeURIComponent(photo.id)}`, { method: "DELETE" });
-        p.photos.splice(Number(b.dataset.photo), 1);
+        p.photos = p.photos.filter(item => item.id !== photo.id);
         if (selectedId === p.id) fillPanel(p, true);
         notify("\u7167\u7247\u5DF2\u5220\u9664");
       } catch {
@@ -668,21 +812,34 @@
     const p = places.find((x) => x.id === selectedId);
     if (!p || !files.length) return;
     const allowed = files.filter((f) => f.type.startsWith("image/"));
-    if (allowed.length !== files.length) notify("\u53EA\u652F\u6301\u6DFB\u52A0\u56FE\u7247\u6587\u4EF6", true);
+    let uploaded = 0, skipped = files.length - allowed.length;
+    let photoError = skipped ? "只支持添加图片文件。" : "";
+    e.target.disabled = true;
     try {
-      await saveRecord(p);
+      if (allowed.length) await saveRecord(p);
       for (const f of allowed) {
         const form = new FormData();
         form.append("file", f);
-        await api(`/api/photos/${encodeURIComponent(p.id)}`, { method: "POST", body: form });
+        try {
+          await api(`/api/photos/${encodeURIComponent(p.id)}`, { method: "POST", body: form });
+          uploaded++;
+        } catch (error) {
+          skipped++;
+          photoError = error?.message || "请稍后重试。";
+        }
       }
-      places = await allPlaces();
-      render(true);
-      notify(`\u5DF2\u6DFB\u52A0 ${allowed.length} \u5F20\u7167\u7247`);
-    } catch (err) {
-      notify("\u7167\u7247\u672A\u80FD\u4FDD\u5B58\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u540E\u91CD\u8BD5", true);
+      if (uploaded) {
+        places = await allPlaces();
+        render(true);
+      }
+      if (skipped) notify(`已添加 ${uploaded} 张，${skipped} 张未上传。${photoError}`, true);
+      else notify(`已添加 ${uploaded} 张照片`);
+    } catch {
+      notify(uploaded ? `已上传 ${uploaded} 张照片，请刷新后查看。` : "照片未能保存，请检查网络或浏览器存储后重试。", true);
+    } finally {
+      e.target.value = "";
+      e.target.disabled = false;
     }
-    e.target.value = "";
   };
   const cityIndex = [["\u5317\u4EAC", 39.9042, 116.4074, "beijing \u5317\u4EAC Beijing"], ["\u4E0A\u6D77", 31.2304, 121.4737, "shanghai \u4E0A\u6D77 Shanghai"], ["\u6210\u90FD", 30.5728, 104.0668, "chengdu \u6210\u90FD Chengdu"], ["\u676D\u5DDE", 30.2741, 120.1551, "hangzhou \u676D\u5DDE Hangzhou"], ["\u897F\u5B89", 34.3416, 108.9398, "xian \u897F\u5B89 Xi\u2019an"], ["\u9999\u6E2F", 22.3193, 114.1694, "hong kong \u9999\u6E2F Hong Kong"], ["\u4E1C\u4EAC", 35.6762, 139.6503, "tokyo \u4E1C\u4EAC Tokyo"], ["\u4EAC\u90FD", 35.0116, 135.7681, "kyoto \u4EAC\u90FD Kyoto"], ["\u5927\u962A", 34.6937, 135.5023, "osaka \u5927\u962A Osaka"], ["\u9996\u5C14", 37.5665, 126.978, "seoul \u9996\u5C14 Seoul"], ["\u65B0\u52A0\u5761", 1.3521, 103.8198, "singapore \u65B0\u52A0\u5761 Singapore"], ["\u66FC\u8C37", 13.7563, 100.5018, "bangkok \u66FC\u8C37 Bangkok"], ["\u5DF4\u9ECE", 48.8566, 2.3522, "paris \u5DF4\u9ECE Paris"], ["\u4F26\u6566", 51.5072, -0.1276, "london \u4F26\u6566 London"], ["\u7F57\u9A6C", 41.9028, 12.4964, "rome \u7F57\u9A6C Rome"], ["\u7EBD\u7EA6", 40.7128, -74.006, "new york \u7EBD\u7EA6 New York"], ["\u6D1B\u6749\u77F6", 34.0522, -118.2437, "los angeles \u6D1B\u6749\u77F6 Los Angeles"], ["\u65E7\u91D1\u5C71", 37.7749, -122.4194, "san francisco \u65E7\u91D1\u5C71 San Francisco"], ["\u6089\u5C3C", -33.8688, 151.2093, "sydney \u6089\u5C3C Sydney"], ["\u58A8\u5C14\u672C", -37.8136, 144.9631, "melbourne \u58A8\u5C14\u672C Melbourne"], ["\u6E29\u54E5\u534E", 49.2827, -123.1207, "vancouver \u6E29\u54E5\u534E Vancouver"], ["\u8FEA\u62DC", 25.2048, 55.2708, "dubai \u8FEA\u62DC Dubai"], ["\u4F0A\u65AF\u5766\u5E03\u5C14", 41.0082, 28.9784, "istanbul \u4F0A\u65AF\u5766\u5E03\u5C14 Istanbul"], ["\u4E09\u4E9A", 18.2528, 109.5119, "sanya \u4E09\u4E9A Sanya"]];
   function showSearchResults(data, local = false) {
