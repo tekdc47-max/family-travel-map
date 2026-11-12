@@ -221,6 +221,13 @@
   .toast,.toast.show {transform:translateX(-50%)}
 }
 
+/* ------------------------------------------------------------------
+   Motion budget. Live backdrop-filter over a moving map forces the
+   blur to be recomputed for every frame of the gesture, which is the
+   real reason panning and pinching feel sticky on mid-range phones.
+   The material is dropped while the map moves and restored once it
+   settles, so nothing is lost visually but the frames stay cheap.
+   ------------------------------------------------------------------ */
 /* Moving and stationary controls share the same material. The lens texture is
    cached and is regenerated only when the control's dimensions change. */
 
@@ -408,13 +415,9 @@ body {background:#f3f5f1}
 
 /* Liquid material over the live map, with Shu Ding's SVG lens at the rim. */
 :root {
-  /* Fills were 12%/52%/67% and relied on the rim lens alone for the glass read.
-     Over a map that meant country names showing through the labels on top of
-     them. The surface now carries enough tint to hold text on its own, and the
-     diffusion comes from a real blur instead of a 0.6px lens pass. */
-  --glass-clear:linear-gradient(155deg,#ffffff8c,#ffffff78 55%,#eafaf5a8);
-  --glass-drawer:linear-gradient(155deg,#ffffffdc,#f7fffbcf);
-  --glass-float:linear-gradient(155deg,#ffffffee,#f7fffbe0);
+  --glass-clear:linear-gradient(155deg,#ffffff20,#ffffff06 55%,#c4f5ed12);
+  --glass-drawer:linear-gradient(155deg,#ffffff85,#f2fffa6b);
+  --glass-float:linear-gradient(155deg,#ffffffac,#f3fffa96);
   --glass-rim:inset 0 0 0 .5px #ffffffba,inset 0 1px 0 #ffffffed,inset 0 -1px 0 #173f3522;
   --glass-shadow:0 2px 3px #123c2910,0 12px 32px #123c2920;
 }
@@ -424,14 +427,14 @@ body {background:#f3f5f1}
   position:absolute;left:28px;top:28px;bottom:28px;width:300px;height:auto;
   padding:24px 20px 18px;border:1px solid #ffffff8a;border-radius:26px;
   background:var(--glass-clear)!important;box-shadow:var(--glass-surface-shadow);
-  -webkit-backdrop-filter:blur(18px) saturate(1.3);
-  backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(1.5px) var(--glass-lens,blur(0px));
 }
 .rail::before,.rail::after {content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none}
 .rail::before {background:linear-gradient(180deg,#ffffff55,transparent 8px)}
 .rail::after {padding:1px;background:linear-gradient(145deg,#fff,#ffffff08 38%,#a1e9ec60 74%,#ffffffe0);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .map-top {left:336px}
-.search {background:#ffffffc4!important;border-color:#ffffffb0;box-shadow:inset 0 1px 3px #23463b12}
+.search {background:#ffffff12!important;border-color:#ffffff9c;box-shadow:inset 0 1px 3px #23463b12}
 .place-row.active {background:#ffffff85;border-color:#ffffff9c}
 .backup-link {background:#ffffff30;border-color:#ffffff90}
 .backup-link:hover,.place-row:hover {background:#ffffff85}
@@ -443,10 +446,10 @@ body {background:#f3f5f1}
 }
 .panel.open.settled {
   background:var(--glass-drawer);
-  -webkit-backdrop-filter:blur(18px) saturate(1.25);
-  backdrop-filter:blur(18px) saturate(1.25);
+  -webkit-backdrop-filter:var(--glass-lens,blur(0px));
+  backdrop-filter:var(--glass-lens,blur(0px));
 }
-.panel-head {background:#ffffff66}
+.panel-head {background:#ffffff22}
 .panel-actions {background:#ffffff69}
 .field input,.field textarea {background:#ffffffba}
 .modal,dialog.modal[open],dialog.modal[open].settled,#cloudLogin {
@@ -455,41 +458,25 @@ body {background:#f3f5f1}
   backdrop-filter:none;
   box-shadow:var(--glass-surface-shadow);
 }
-/* Only the foreground panel needs live diffusion while it is open. This also
-   overrides the mobile sidebar's important blur without changing gesture states. */
-body.has-foreground .rail {
-  background:#f8fcfae6!important;
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
-}
+body.has-foreground .rail {background:var(--glass-clear)!important}
 @media(min-width:761px) and (max-width:1100px) {
   .rail {left:24px;top:24px;bottom:24px;width:270px;padding:22px 16px}
   .map-top {left:306px}
 }
 @media(max-width:760px) {
   .app {padding:0}
-  .rail {left:10px;right:10px;top:max(10px,env(safe-area-inset-top));bottom:auto;width:auto;max-height:36dvh;padding:14px 16px 10px;border-radius:22px;backdrop-filter:blur(16px) saturate(1.3)!important;-webkit-backdrop-filter:blur(16px) saturate(1.3)}
+  .rail {left:10px;right:10px;top:max(10px,env(safe-area-inset-top));bottom:auto;width:auto;max-height:36dvh;padding:14px 16px 10px;border-radius:22px;backdrop-filter:blur(1.5px) var(--glass-lens,blur(0px))!important;-webkit-backdrop-filter:blur(2px)}
   .map-top {left:16px}
   .map-shell {height:100dvh}
   .map-caption {display:none}
-  .map-hint {left:16px;right:80px;bottom:112px;max-width:none;transform:none}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
   .rail {background:#edf7efed!important}
 }
 @supports (backdrop-filter:blur(0px)) {
-  /* Large surfaces use simple diffusion for text. Small controls retain the
-     refraction rim without adding a lens to every large floating surface. */
-  /* The earlier control rule is written with :is(), which carries the
-     specificity of its most specific argument (.map-actions button), so these
-     need one extra class to win. */
-  .map-shell :is(.map-caption,.map-hint) {
-    -webkit-backdrop-filter:blur(14px) saturate(1.25);
-    backdrop-filter:blur(14px) saturate(1.25);
-  }
-  .map-actions button,.leaflet-bar {
-    -webkit-backdrop-filter:var(--glass-lens,blur(8px));
-    backdrop-filter:var(--glass-lens,blur(8px));
+  .map-caption,.map-hint,.map-actions button,.leaflet-bar {
+    -webkit-backdrop-filter:var(--glass-lens,blur(0px));
+    backdrop-filter:var(--glass-lens,blur(0px));
   }
   :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::before {
     background:linear-gradient(180deg,#ffffff55,transparent 8px);
@@ -497,14 +484,7 @@ body.has-foreground .rail {
   }
 }
 @media(prefers-reduced-transparency:reduce) {
-  .rail,.search,.search-results,.map-caption,.map-hint,.map-actions button,
-  .leaflet-bar,.panel.open.settled,.modal,dialog.modal[open].settled,#cloudLogin,
-  .field input,.field textarea {
-    background:#f8fcfa!important;
-    -webkit-backdrop-filter:none!important;
-    backdrop-filter:none!important;
-  }
+  .rail {background:#f8fcfa!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   .rail::before,.rail::after {content:none}
   .map-actions .pill-btn.primary {background:#285f4c!important}
-  .toast:not(.error) {background:#0b4b40!important}
 }
