@@ -1,0 +1,510 @@
+/* Only controls and floating surfaces get glass; the map and scrim stay sharp. */
+:root {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --glass: #f8fcfa;
+  --glass-ink: #173832;
+  --glass-muted: #31544c;
+  --glass-rim: inset 0 0 0 .5px #fff9, inset 0 1px 0 #ffffffeb, inset 0 -1px 0 #0d26230f;
+  --glass-shadow: 0 1px 2px #0d26230d, 0 10px 30px #0d26231a;
+  --glass-surface-shadow: var(--glass-rim),var(--glass-shadow);
+  --glass-clear: linear-gradient(180deg,#ffffff2b,#ffffff0a 54%,#e0fff019);
+  --glass-float: linear-gradient(180deg,#ffffffad,#ffffff70);
+  --glass-drawer: linear-gradient(180deg,#f8fcfa92,#f8fcfad1);
+  --glass-dark: linear-gradient(180deg,#073e35bf,#062e29b8);
+  --glass-control-blur: blur(1px) saturate(1.35);
+  --glass-panel-blur: blur(8px) saturate(1.5);
+  --glass-float-blur: blur(22px) saturate(1.8) brightness(1.04);
+  --glass-spring: cubic-bezier(.32,.72,0,1);
+}
+.app {overflow:clip}
+.map-shell {isolation:isolate}
+.map-shell,.leaflet-container {background:#c6deeb}
+.map-status {
+  position:absolute;z-index:440;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:max-content;max-width:calc(100% - 40px);padding:14px 18px;
+  border-radius:18px;background:#f8fcfa;color:var(--glass-ink);
+  box-shadow:var(--glass-shadow);text-align:center;
+}
+.map-status p {margin:0;font-size:14px;line-height:1.6}
+.map-status button {margin-top:10px}
+.rail {border-right:0;box-shadow:1px 0 2px #0d262308,8px 0 24px #0d26230d}
+.panel[aria-hidden="true"] {visibility:hidden}
+.map-hint[hidden] {display:none}
+.picking-point.leaflet-container,.picking-point.leaflet-container .leaflet-interactive {cursor:crosshair}
+.panel-actions {
+  flex:none;margin:0;padding:12px 24px;
+  border-top:1px solid #648a7725;background:#f8fcfaf2;
+}
+.panel-body {min-height:0}
+.photo-pending {display:grid;place-items:center;height:100%;font-size:12px;color:var(--glass-muted)}
+#addModal,#backupDialog {box-sizing:border-box;margin:auto;max-width:calc(100% - 28px);max-height:calc(100dvh - 32px);overflow:auto}
+#addModal::backdrop,#backupDialog::backdrop {background:#18383242}
+.rail-tools {display:flex;align-items:center;gap:8px}
+.backup-link {color:#116a5d;background:#edf6f2;border:0;border-radius:8px;padding:4px 8px;min-height:34px;font-size:12px;white-space:nowrap}
+.backup-heading {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.backup-download {width:100%}
+.backup-restore {border-top:1px solid #648a7740;margin-top:20px;padding-top:16px}
+.backup-restore h3 {margin:0;font-size:16px}
+.backup-restore .modal-actions {margin-top:12px;flex-wrap:wrap}
+.backup-restore .modal-actions button {flex:1;white-space:nowrap}
+#backupStatus {margin:12px 0 0}
+#backupStatus:empty {display:none}
+#backupStatus.error {color:#842b2b}
+#backupDialog button:disabled,.backup-link:disabled {opacity:.55;cursor:not-allowed}
+#addError {color:#842b2b}
+.toast {
+  bottom:70px;max-width:calc(100% - 28px);width:max-content;border-radius:999px;
+  background:#0b4b40;box-shadow:var(--glass-surface-shadow);
+  transition:opacity 220ms var(--glass-spring),transform 220ms var(--glass-spring);
+}
+.leaflet-control-attribution {
+  margin:0 12px 4px 0!important;
+  font-size:11px!important;
+}
+.search, .search-results, .map-caption, .map-hint, .pill-btn, .icon-btn,
+.panel, .modal, .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--glass);
+  border: 1px solid #fff9;
+  box-shadow: var(--glass-surface-shadow);
+  color: var(--glass-ink);
+}
+.search {
+  background: #f6fbf8;
+  display:block;
+  box-shadow:var(--glass-rim),0 0 0 1px #86a99b70;
+}
+.search,.search-wrap,.map-actions button,.map-hint {border-radius:999px}
+.map-caption,.search-results {border-radius:22px}
+.map-caption,.map-actions button {position:relative}
+.search:focus {border-color:#337d70;box-shadow:var(--glass-rim),0 0 0 2px #337d7066}
+.search::placeholder, .search-icon, .map-caption span, .map-hint, .modal p,
+.brand p, .empty-list, .rail-foot, .photo-head span, .place-row small {
+  color: var(--glass-muted);
+}
+.search-icon {z-index:1;pointer-events:none}
+.panel {
+  border-radius:26px;opacity:0;transform:translateX(calc(100% + 30px)) scale(1.02);
+  transition:transform 300ms var(--glass-spring),opacity 220ms var(--glass-spring);
+}
+.panel.open {opacity:1;transform:translateX(0) scale(1)}
+.modal {
+  border-radius:26px;
+  transition:transform 260ms var(--glass-spring),opacity 200ms var(--glass-spring);
+}
+@starting-style {
+  .modal[open] {opacity:0;transform:scale(1.02)}
+}
+.panel-head {border-color:#648a7725}
+.panel-head .eyebrow {color:#266558}
+.field input, .field textarea {
+  background:#ffffffdc;
+  border-color:#a3bcb27d;
+  color:var(--glass-ink);
+  box-shadow:inset 0 1px 2px #0d26230f;
+}
+.field input::placeholder, .field textarea::placeholder {color:var(--glass-muted)}
+.search-result {background:transparent;color:var(--glass-ink)}
+.search-result span {color:var(--glass-muted)}
+.modal-backdrop {background:#18383242;backdrop-filter:none}
+.pill-btn.primary {
+  background:#116a5def;
+  color:#fff;
+  border-color:#ffffffbf;
+  box-shadow:inset 0 1px 1px #ffffff5e, 0 5px 14px #164e3e30;
+}
+.pill-btn.primary:hover {background:#0d5c50}
+.save-btn {background:#116a5d}
+.save-btn:hover {background:#0d5c50}
+.panel-close,.cancel-btn {
+  background:#edf6f2;
+  color:#24473e;
+  border:1px solid #fff;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px #193c4316;
+}
+.panel-close {width:44px;height:44px;border-radius:999px}
+.map-actions button,.panel-close,.leaflet-bar a {
+  transition:transform 200ms var(--glass-spring),box-shadow 200ms var(--glass-spring);
+}
+.map-actions button:active,.panel-close:active,.leaflet-bar a:active {transform:scale(.96)}
+.leaflet-bar {
+  background:var(--glass);
+  border:1px solid #fff9!important;
+  border-radius:24px!important;
+  box-shadow:var(--glass-surface-shadow)!important;
+}
+.leaflet-bar a {background:transparent;width:44px!important;height:44px!important;line-height:44px!important}
+.leaflet-bar a:hover {background:#ffffff46}
+.leaflet-bar a.leaflet-disabled {background:#f8fcfa26;color:var(--glass-muted)!important}
+.leaflet-bar a:focus-visible {outline:2px solid #146b5b;outline-offset:-3px}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .rail {background:#edf6f2}
+  .search,.map-caption,.map-hint,.map-actions button,.leaflet-bar {background:var(--glass-clear)}
+  :is(.map-caption,.map-hint,.map-actions button,.leaflet-bar) {
+    -webkit-backdrop-filter:var(--glass-control-blur);
+    backdrop-filter:var(--glass-lens,var(--glass-control-blur)) saturate(1.34) brightness(1.04);
+  }
+  .panel.open {
+    background:var(--glass-drawer);
+    -webkit-backdrop-filter:var(--glass-panel-blur);
+    backdrop-filter:var(--glass-panel-blur);
+  }
+  .modal {
+    background:var(--glass-float);
+    -webkit-backdrop-filter:var(--glass-float-blur);
+    backdrop-filter:var(--glass-float-blur);
+  }
+  .search-results {background:#f8fcfaee}
+  .map-actions .icon-btn:hover {background:var(--glass-clear);box-shadow:var(--glass-rim),0 3px 14px #0d262326}
+  .map-actions .pill-btn.primary,.map-actions .pill-btn.primary:hover,.toast:not(.error) {
+    background:var(--glass-dark);color:#fff;border-color:#fff9;box-shadow:var(--glass-surface-shadow);
+  }
+  :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::before {
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:radial-gradient(ellipse 76% 31% at 23% 0%,#ffffff91,transparent 83%);
+    mix-blend-mode:screen;
+  }
+  .map-actions button:active::before {transform:scaleX(.84);opacity:.72}
+  @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+    :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::after {
+      content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+      background:linear-gradient(155deg,#fffffff2,#ffffff0f 42%,#c9fff277 78%,#ffffffcc);
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;
+    }
+  }
+  /* An open foreground surface gets the filter budget. */
+  body.has-foreground :is(.rail,.map-caption,.map-hint,.map-actions button,.leaflet-bar) {
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
+@media(max-width:760px) {
+  :root {
+    --glass-panel-blur:blur(6px) saturate(1.45);
+    --glass-float-blur:blur(14px) saturate(1.8) brightness(1.04);
+  }
+  .rail {
+    border:1px solid #ffffffa0;border-radius:22px;box-shadow:var(--glass-surface-shadow);
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .rail {
+      background:linear-gradient(180deg,#f8fcfa55,#f8fcfa24);
+      -webkit-backdrop-filter:blur(2px) saturate(1.35);
+      backdrop-filter:blur(2px) saturate(1.35);
+    }
+  }
+  .backup-link {min-height:44px}
+  .rail {max-height:44dvh}
+  .place-list:has(.empty-list) {max-height:none}
+  .panel {height:min(58dvh,670px);border-radius:26px 26px 0 0;transform:translateY(calc(100% + 18px)) scale(1.02)}
+  .panel.open {transform:translateY(0) scale(1)}
+  .panel-actions {padding:10px 18px max(10px,env(safe-area-inset-bottom))}
+  .leaflet-control-zoom {margin-bottom:128px!important}
+  .toast {bottom:136px}
+}
+@media(prefers-reduced-transparency:reduce) {
+  .rail,.search,.search-results,.panel,.panel.open,.modal,.map-caption,.map-hint,.map-actions button,.leaflet-bar {
+    background:#f8fcfa;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+  .map-actions .pill-btn.primary,.map-actions .pill-btn.primary:hover,.toast:not(.error) {background:#116a5d;color:#fff}
+  .map-actions .icon-btn:hover {background:#f8fcfa}
+  :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::before,
+  :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::after {content:none}
+}
+@media(prefers-reduced-motion:reduce) {
+  .photo-card:hover img,.pill-btn:hover,.icon-btn:hover,.panel,.panel.open,.modal[open],
+  .map-actions button:active,.panel-close:active,.leaflet-bar a:active,.map-actions button:active::before {transform:none}
+  .toast,.toast.show {transform:translateX(-50%)}
+}
+
+/* Moving and stationary controls share the same material. The lens texture is
+   cached and is regenerated only when the control's dimensions change. */
+
+/* A surface that is still sliding in gets a flat tint; the filter is attached
+   only after it lands. Animating an element that carries a live blur is the
+   other half of the stutter people read as "not smooth". */
+.panel.open {background:#f8fcfaf2;-webkit-backdrop-filter:none;backdrop-filter:none}
+.panel.open.settled {
+  background:var(--glass-drawer);
+  -webkit-backdrop-filter:var(--glass-panel-blur);
+  backdrop-filter:var(--glass-panel-blur);
+}
+dialog.modal[open] {background:#f8fcfaf5;-webkit-backdrop-filter:none;backdrop-filter:none}
+dialog.modal[open].settled {
+  background:var(--glass-float);
+  -webkit-backdrop-filter:var(--glass-float-blur);
+  backdrop-filter:var(--glass-float-blur);
+}
+.panel.open,.modal[open] {will-change:transform}
+.panel.open.settled,.modal[open].settled {will-change:auto}
+@media(prefers-reduced-transparency:reduce) {
+  .panel.open.settled,dialog.modal[open].settled {
+    background:#f8fcfa;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
+
+/* Country names track the map by scale instead of being re-laid out on every
+   zoom frame: one inherited variable, compositor-only animation. A long flight
+   fades them out instead, so they cannot pile up mid-air. */
+.region-name {opacity:var(--label-opacity,1);transition:opacity 140ms linear}
+.region-name span {
+  transform:translate(-50%,-50%) scale(var(--label-scale,1));
+  transform-origin:50% 50%;
+  transition:transform var(--label-ms,240ms) linear;
+}
+body.is-zooming .region-name span {transition:none}
+
+/* Touch and press feedback: respond on pointer-down, not 300ms later. */
+button,a,input,textarea,label,.place-row,.photo-card,.add-photo {-webkit-tap-highlight-color:transparent}
+button,.place-row,.photo-card,.add-photo {-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.pill-btn,.icon-btn,.place-row,.photo-card,.add-photo,.save-btn,.cancel-btn,.delete-btn,.panel-close,.search-result {
+  transition:transform 160ms cubic-bezier(.2,.9,.28,1),background-color 180ms ease,box-shadow 180ms ease;
+}
+.pill-btn:active,.icon-btn:active,.add-photo:active,.save-btn:active,.cancel-btn:active,
+.delete-btn:active,.place-row:active,.search-result:active {transform:scale(.965)}
+.place-list,.panel-body {overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.place-list {scroll-behavior:smooth}
+.photo-card img {content-visibility:auto}
+
+@media(prefers-reduced-motion:reduce) {
+  .region-name span {transition:none}
+  .pill-btn,.icon-btn,.place-row,.photo-card,.add-photo,.save-btn,.cancel-btn,
+  .delete-btn,.panel-close,.search-result {transition-property:background-color,box-shadow}
+  .pill-btn:active,.icon-btn:active,.add-photo:active,.save-btn:active,.cancel-btn:active,
+  .delete-btn:active,.place-row:active,.search-result:active {transform:none}
+  .place-list {scroll-behavior:auto}
+}
+
+/* Travel journal layout. The map is the main sheet inside a quiet green frame. */
+:root {
+  --glass-ink:#213d36;
+  --glass-muted:#526b62;
+  --glass-clear:linear-gradient(180deg,#fffffff0,#ffffffe0);
+  --glass-drawer:linear-gradient(180deg,#fcfdfbf5,#f8fbf8f5);
+  --glass-float:linear-gradient(180deg,#fffffff7,#f9fcfaf2);
+  --glass-control-blur:blur(12px) saturate(1.2);
+  --glass-panel-blur:blur(18px) saturate(1.2);
+  --glass-shadow:0 4px 20px #203f3412;
+  --glass-rim:inset 0 1px 0 #ffffffb0;
+}
+body {background:#f3f5f1}
+.app {grid-template-columns:340px minmax(0,1fr);grid-template-rows:minmax(0,1fr);padding:12px 12px 12px 0;gap:0}
+.rail {background:#f3f5f1!important;padding:30px 24px 18px;box-shadow:none;border:0}
+.brand {gap:12px;margin-bottom:30px;align-items:flex-start}
+.brand-mark {width:36px;height:40px;border-radius:0;background:transparent;color:#276a55;flex:none}
+.brand-mark svg {width:30px;height:30px}
+.brand h1 {font-size:23px;line-height:1.4;letter-spacing:-.8px;font-weight:650}
+.brand p {font-size:12px;line-height:1.6;margin-top:5px;color:#5e7268}
+.search-wrap {border-radius:12px}
+.search {height:48px;border-radius:12px;background:#fff!important;border:1px solid #dce5dc;box-shadow:none}
+.search::placeholder {color:#667a70}
+.search-icon {top:12px;left:15px;font-size:23px;color:#526b62}
+.section-head {flex-wrap:wrap;gap:14px;margin:30px 0 14px;align-items:center}
+.section-head h2 {font-size:15px;color:#233e35;letter-spacing:.02em}
+.rail-tools {display:flex;flex-wrap:wrap;gap:6px;width:100%;align-items:center}
+.count {margin-right:auto;padding:0;background:none;color:#4f6558;border-radius:0;font-size:12px;font-variant-numeric:tabular-nums}
+.backup-link {padding:7px 9px;background:transparent;color:#3c6251;min-height:34px;border:1px solid #dae3d9;border-radius:8px;font-size:12px}
+.backup-link:hover {background:#e5ece2}
+.place-list {margin:0 -8px;padding:0 8px;scrollbar-width:thin;scrollbar-color:#bccdc0 transparent}
+.place-row {padding:15px 12px;margin:0 0 6px;gap:13px;border:1px solid transparent;border-radius:12px}
+.place-row:hover {background:#e9eee6}
+.place-row.active {background:#fff;border-color:#d9e4d8}
+.place-row strong {font-size:15px;font-weight:600;line-height:1.5;overflow-wrap:anywhere}
+.place-row small {font-size:12px;line-height:1.5;margin-top:4px;color:#4f6558;font-variant-numeric:tabular-nums}
+.place-emoji {width:34px;height:38px;background:transparent;border-radius:0;font-size:0;color:#467b61}
+.place-emoji::before {content:"";width:18px;height:23px;background:currentColor;clip-path:path("M9 0C4 0 0 4 0 9c0 6 9 14 9 14s9-8 9-14C18 4 14 0 9 0Zm0 5a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z")}
+.empty-list {border:0;border-top:1px solid #dce4d8;border-radius:0;background:none;margin-top:4px;padding:24px 5px;color:#536c5f;font-size:14px;line-height:1.9}
+.rail-foot {border-top:1px solid #dce4d8;padding:17px 4px 0;font-size:12px;line-height:1.8;color:#5b7365}
+.map-shell {height:100%;border:1px solid #d8e3df;border-radius:20px;overflow:hidden;min-width:0}
+.map-shell,.leaflet-container {background:#e6eef0}
+.map-top {top:20px;left:20px;right:20px;align-items:flex-start;gap:16px}
+.map-caption {padding:13px 16px;border-radius:13px;background:#ffffffe8;max-width:310px;box-shadow:0 2px 14px #2347390b}
+.map-caption b {font-size:15px;letter-spacing:.02em;font-weight:600}
+.map-caption span {font-size:12px;line-height:1.6;margin-top:3px}
+.map-actions {gap:9px;flex:none}
+.pill-btn,.icon-btn {height:46px;min-height:46px}
+.map-actions .pill-btn.primary,.map-actions .pill-btn.primary:hover {background:#285f4c;color:white;border:1px solid #285f4c;box-shadow:0 3px 10px #244f3218}
+.pill-btn {padding:0 20px;font-size:14px;font-weight:600}
+.icon-btn {width:46px}
+.map-hint {font-size:12px;bottom:18px;padding:9px 16px;box-shadow:0 2px 12px #2347390b}
+.leaflet-bar {border-radius:13px!important;box-shadow:0 3px 16px #1c3f3212!important}
+.leaflet-bar a {width:42px!important;height:42px!important;line-height:42px!important;font-weight:400}
+.leaflet-bottom.leaflet-right {right:10px;bottom:10px}
+.panel {top:24px;right:24px;bottom:24px;width:min(420px,calc(100% - 370px));border:1px solid #dde7de;border-radius:20px;box-shadow:0 12px 50px #1b44351a}
+.panel-head {padding:24px;gap:12px;border-color:#dce5da}
+.panel-head h2 {font-size:24px;font-weight:600;line-height:1.4;letter-spacing:-.5px}
+.eyebrow {font-size:11px;letter-spacing:.12em;margin-bottom:7px}
+.panel-body {padding:22px 24px 28px}
+.field {margin-bottom:19px}
+.field label {font-size:13px;color:#4c6758;margin-bottom:8px}
+.field input,.field textarea {border:1px solid #d5e0d4;border-radius:10px;background:#fff;box-shadow:none;padding:10px 12px;font-size:16px}
+.field input:focus,.field textarea:focus {outline:2px solid #578a6d;outline-offset:2px}
+.panel-actions {padding:14px 24px;background:#f9fcf7;border-color:#dce5da}
+.save-btn {background:#285f4c;border-radius:10px;font-weight:600}
+.save-btn:hover {background:#204f3e}
+.delete-btn {border-radius:10px;background:#f6ece8;color:#954f3f;font-weight:500}
+.cancel-btn {border-radius:10px;background:#f2f6ef;box-shadow:none;border:1px solid #dae4d7}
+.modal {border-radius:20px;padding:28px;border:1px solid #dce5d8}
+.modal h2 {font-size:22px;line-height:1.5;font-weight:600;margin-bottom:10px}
+.modal p {line-height:1.8;color:#526b5c}
+#cloudLogin {background:#fbfdf8;border:1px solid #d8e3d5;box-shadow:0 16px 70px #2c50331c}
+#cloudLogin .save-btn {width:100%;margin-top:5px}
+#accountAdminDialog {width:min(480px,calc(100% - 28px))}
+@media(min-width:761px) and (max-width:1100px) {
+  .app {grid-template-columns:294px minmax(0,1fr)}
+  .rail {padding-left:18px;padding-right:18px}
+  .brand h1 {font-size:20px}
+  .map-caption {max-width:215px}
+  .map-caption span {font-size:11px}
+  .panel {width:min(410px,calc(100% - 320px))}
+}
+@media(max-width:760px) {
+  .app {display:block;padding:0}
+  .map-shell {height:100dvh;border:0;border-radius:0}
+  .rail {top:max(10px,env(safe-area-inset-top));left:10px;right:10px;padding:14px 16px 10px;border:1px solid #dce6d8;border-radius:18px;max-height:36dvh;background:#f9fcf7f5!important;box-shadow:0 4px 24px #274d3212;backdrop-filter:none!important}
+  .brand {margin-bottom:12px;gap:9px;align-items:center}
+  .brand-mark {width:24px;height:25px}
+  .brand-mark svg {width:23px;height:23px}
+  .brand h1 {font-size:18px;letter-spacing:-.4px}
+  .brand p {display:none}
+  .search {height:44px}
+  .section-head {margin:13px 0 4px;gap:8px;flex-wrap:nowrap}
+  .section-head h2 {font-size:13px;white-space:nowrap}
+  .rail-tools {width:auto;justify-content:flex-end;gap:5px}
+  .count {margin-right:2px;font-size:11px}
+  .backup-link {min-height:44px;padding:6px;font-size:11px}
+  .place-list {max-height:74px}
+  .place-list:has(.empty-list) {max-height:none}
+  .empty-list {border:0;margin:0;padding:8px 3px 4px;font-size:12px;line-height:1.7}
+  .place-row {padding:8px 9px;gap:9px}
+  .place-row strong {font-size:14px}
+  .place-row small {font-size:11px;margin-top:2px}
+  .place-emoji {width:24px;height:30px}
+  .map-top {top:auto;bottom:max(25px,env(safe-area-inset-bottom));left:16px;right:16px}
+  .map-actions {gap:8px}
+  .pill-btn {padding:0 18px}
+  .map-hint {bottom:84px;font-size:11px;max-width:calc(100% - 100px);padding:7px 12px}
+  .leaflet-control-zoom {margin-bottom:18px!important}
+  .leaflet-bottom.leaflet-right {right:7px;bottom:78px}
+  .leaflet-control-attribution {font-size:10px!important;margin-bottom:0!important}
+  .panel {top:auto;left:0;right:0;bottom:0;width:auto;height:min(62dvh,680px);border-radius:22px 22px 0 0}
+  .panel-head {padding:19px 20px 15px}
+  .panel-head h2 {font-size:21px}
+  .panel-body {padding:17px 20px 24px}
+  .panel-actions {padding:12px 20px max(12px,env(safe-area-inset-bottom))}
+  .modal {padding:23px}
+  .toast {bottom:90px}
+}
+@media(prefers-reduced-transparency:reduce) {
+  .map-caption,.map-hint,.map-actions button,.leaflet-bar,.rail,.panel.open.settled,.modal,dialog.modal[open].settled {background:#f8fcfa!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .map-actions .pill-btn.primary {background:#285f4c!important}
+}
+
+/* Liquid material over the live map, with Shu Ding's SVG lens at the rim. */
+:root {
+  /* Fills were 12%/52%/67% and relied on the rim lens alone for the glass read.
+     Over a map that meant country names showing through the labels on top of
+     them. The surface now carries enough tint to hold text on its own, and the
+     diffusion comes from a real blur instead of a 0.6px lens pass. */
+  --glass-clear:linear-gradient(155deg,#ffffff8c,#ffffff78 55%,#eafaf5a8);
+  --glass-drawer:linear-gradient(155deg,#ffffffdc,#f7fffbcf);
+  --glass-float:linear-gradient(155deg,#ffffffee,#f7fffbe0);
+  --glass-rim:inset 0 0 0 .5px #ffffffba,inset 0 1px 0 #ffffffed,inset 0 -1px 0 #173f3522;
+  --glass-shadow:0 2px 3px #123c2910,0 12px 32px #123c2920;
+}
+.app {display:block;padding:12px}
+.map-shell {height:100%;width:100%}
+.rail {
+  position:absolute;left:28px;top:28px;bottom:28px;width:300px;height:auto;
+  padding:24px 20px 18px;border:1px solid #ffffff8a;border-radius:26px;
+  background:var(--glass-clear)!important;box-shadow:var(--glass-surface-shadow);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  backdrop-filter:blur(18px) saturate(1.3);
+}
+.rail::before,.rail::after {content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none}
+.rail::before {background:linear-gradient(180deg,#ffffff55,transparent 8px)}
+.rail::after {padding:1px;background:linear-gradient(145deg,#fff,#ffffff08 38%,#a1e9ec60 74%,#ffffffe0);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.map-top {left:336px}
+.search {background:#ffffffc4!important;border-color:#ffffffb0;box-shadow:inset 0 1px 3px #23463b12}
+.place-row.active {background:#ffffff85;border-color:#ffffff9c}
+.backup-link {background:#ffffff30;border-color:#ffffff90}
+.backup-link:hover,.place-row:hover {background:#ffffff85}
+.rail-foot,.empty-list {border-color:#4a756828}
+.map-caption {background:var(--glass-clear);box-shadow:var(--glass-surface-shadow);border:1px solid #ffffff90}
+.map-actions .pill-btn.primary,.map-actions .pill-btn.primary:hover {
+  background:linear-gradient(150deg,#0d5e45aa,#174b40ae);border:1px solid #ffffffa3;
+  box-shadow:var(--glass-surface-shadow);
+}
+.panel.open.settled {
+  background:var(--glass-drawer);
+  -webkit-backdrop-filter:blur(18px) saturate(1.25);
+  backdrop-filter:blur(18px) saturate(1.25);
+}
+.panel-head {background:#ffffff66}
+.panel-actions {background:#ffffff69}
+.field input,.field textarea {background:#ffffffba}
+.modal,dialog.modal[open],dialog.modal[open].settled,#cloudLogin {
+  background:var(--glass-float);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  box-shadow:var(--glass-surface-shadow);
+}
+/* Only the foreground panel needs live diffusion while it is open. This also
+   overrides the mobile sidebar's important blur without changing gesture states. */
+body.has-foreground .rail {
+  background:#f8fcfae6!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+@media(min-width:761px) and (max-width:1100px) {
+  .rail {left:24px;top:24px;bottom:24px;width:270px;padding:22px 16px}
+  .map-top {left:306px}
+}
+@media(max-width:760px) {
+  .app {padding:0}
+  .rail {left:10px;right:10px;top:max(10px,env(safe-area-inset-top));bottom:auto;width:auto;max-height:36dvh;padding:14px 16px 10px;border-radius:22px;backdrop-filter:blur(16px) saturate(1.3)!important;-webkit-backdrop-filter:blur(16px) saturate(1.3)}
+  .map-top {left:16px}
+  .map-shell {height:100dvh}
+  .map-caption {display:none}
+  .map-hint {left:16px;right:80px;bottom:112px;max-width:none;transform:none}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  .rail {background:#edf7efed!important}
+}
+@supports (backdrop-filter:blur(0px)) {
+  /* Large surfaces use simple diffusion for text. Small controls retain the
+     refraction rim without adding a lens to every large floating surface. */
+  /* The earlier control rule is written with :is(), which carries the
+     specificity of its most specific argument (.map-actions button), so these
+     need one extra class to win. */
+  .map-shell :is(.map-caption,.map-hint) {
+    -webkit-backdrop-filter:blur(14px) saturate(1.25);
+    backdrop-filter:blur(14px) saturate(1.25);
+  }
+  .map-actions button,.leaflet-bar {
+    -webkit-backdrop-filter:var(--glass-lens,blur(8px));
+    backdrop-filter:var(--glass-lens,blur(8px));
+  }
+  :where(.search-wrap,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.panel,.modal)::before {
+    background:linear-gradient(180deg,#ffffff55,transparent 8px);
+    mix-blend-mode:normal;
+  }
+}
+@media(prefers-reduced-transparency:reduce) {
+  .rail,.search,.search-results,.map-caption,.map-hint,.map-actions button,
+  .leaflet-bar,.panel.open.settled,.modal,dialog.modal[open].settled,#cloudLogin,
+  .field input,.field textarea {
+    background:#f8fcfa!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  .rail::before,.rail::after {content:none}
+  .map-actions .pill-btn.primary {background:#285f4c!important}
+  .toast:not(.error) {background:#0b4b40!important}
+}
