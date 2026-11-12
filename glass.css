@@ -228,12 +228,8 @@
    The material is dropped while the map moves and restored once it
    settles, so nothing is lost visually but the frames stay cheap.
    ------------------------------------------------------------------ */
-body.is-map-moving :is(.search,.map-caption,.map-hint,.map-actions button,.leaflet-bar,.rail,.panel,.modal,.toast) {
-  -webkit-backdrop-filter:none!important;
-  backdrop-filter:none!important;
-}
-body.is-map-moving .region-lit {filter:none!important}
-body.is-map-moving .pin-core {box-shadow:0 1px 3px #24413d33}
+/* Moving and stationary controls share the same material. The lens texture is
+   cached and is regenerated only when the control's dimensions change. */
 
 /* A surface that is still sliding in gets a flat tint; the filter is attached
    only after it lands. Animating an element that carries a live blur is the

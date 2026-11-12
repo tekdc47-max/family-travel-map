@@ -20,6 +20,9 @@
       body:not(.leaflet-dragging) #map path.leaflet-interactive:not(.region-lit):hover{stroke:#528d7d;stroke-width:1.4px}
     }
     .region-name{background:none;border:0;pointer-events:none}
+    /* The map shell clips the viewport. Keep complete region paths available
+       outside Leaflet's last renderer bounds while a drag is still in progress. */
+    .leaflet-countries-pane>svg,.leaflet-administrative-pane>svg,.leaflet-cities-pane>svg{overflow:visible}
     .region-name span{display:block;width:max-content;transform:translate(-50%,-50%);white-space:pre;text-align:center;font-family:"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-weight:600;letter-spacing:.025em;color:#244940;-webkit-text-stroke:2px #eff8f4;paint-order:stroke fill;line-height:1.2}
     .region-name.is-badge span{padding:0 2px;border-radius:3px;background:#eff8f4ed;-webkit-text-stroke:0}
     .region-name.is-selected span{color:#10372f}
@@ -50,7 +53,7 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
-  <link rel="stylesheet" href="./family-glass-db95c814c8.css?v=20261111-convex">
+  <link rel="stylesheet" href="./family-glass-7362b6cea1.css?v=20261112-wrap">
 </head>
 <body>
   <main class="app" id="cloudMap" style="visibility:hidden" inert>
@@ -163,6 +166,7 @@
   <script src="./family-preview-supabase.js"></script>
   <script type="module">
   import {labelShape, labelFits} from "./region-labels.js";
+  import {wrapLongitude, repeatWorldFeatures, sameWorldRegion} from "./family-map-world-2bd5d40110.js";
   import {applyGlassRefraction} from "./family-glass-refraction-32a4d6b812.js?v=20261111-convex";
   import {connectFamilyMap} from './family-cloud-3916f37072.js';
   import {mountAccountAdmin} from './family-account-admin-7a7d1a902f.js';
@@ -206,17 +210,23 @@
   const homeCenter = () => window.innerWidth <= 760 ? [31, 105] : [24, 8];
   const map = L.map("map", {
     zoomControl: false, minZoom: 2, maxZoom: 18, worldCopyJump: false,
-    // GeoJSON has one world, so keep the camera inside its geographic coverage.
-    maxBounds: [[-85, -180], [85, 180]], maxBoundsViscosity: 1,
+    // Longitude repeats. The distant horizontal limit is never reached because
+    // camera longitude is normalized after each movement.
+    maxBounds: [[-85, -1000000], [85, 1000000]], maxBoundsViscosity: 1,
     zoomAnimation: !reducedMotion.matches, inertia: !reducedMotion.matches,
     // Continuous zoom: the wheel no longer snaps between whole levels.
     zoomSnap: 0.15, wheelPxPerZoomLevel: 100, wheelDebounceTime: 25,
     inertiaDeceleration: 2800, inertiaMaxSpeed: 1600, easeLinearity: 0.2
   }).setView(homeCenter(), 2);
+  const worldRadius = Math.ceil(Math.max(screen.width, innerWidth) / map.options.crs.scale(2) / 2) + 1;
+  const worldOffsets = Array.from({length:worldRadius * 2 + 1}, (_,i) => (i-worldRadius) * 360);
+  map.on("moveend", () => {
+    const center = map.getCenter(), lng = wrapLongitude(center.lng);
+    if (Math.abs(lng-center.lng) > 0.001) map.panTo([center.lat,lng], {animate:false});
+  });
   reducedMotion.addEventListener("change", () => { map.options.inertia = !reducedMotion.matches; });
   L.control.zoom({ position: "bottomright" }).addTo(map);
-  // Motion bus: live blur over a moving map is what makes panning stutter, so the
-  // material is dropped for the duration of the gesture and restored once it settles.
+  // Gesture state controls label transitions only; glass keeps the same material.
   let idleTimer = 0;
   const setMoving = (on) => {
     document.body.classList.toggle("is-map-moving", on);
@@ -269,14 +279,15 @@
     return false;
   }
   function featureHasVisit(feature) {
-    const cached = visitCache.get(feature);
+    const geometry = feature._sourceGeometry || feature.geometry;
+    const cached = visitCache.get(geometry);
     if (cached?.signature === visitSignature) return cached.lit;
-    const lit = places.some((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng) && geometryContainsPoint([Number(p.lng), Number(p.lat)], feature.geometry));
-    visitCache.set(feature, { signature: visitSignature, lit });
+    const lit = places.some((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng) && geometryContainsPoint([wrapLongitude(Number(p.lng)), Number(p.lat)], geometry));
+    visitCache.set(geometry, { signature: visitSignature, lit });
     return lit;
   }
   function paintRegion(layer) {
-    const hidden = layer === hiddenCountry || layer === hiddenProvince;
+    const hidden = sameWorldRegion(layer, hiddenCountry) || sameWorldRegion(layer, hiddenProvince);
     const lit = featureHasVisit(layer.feature);
     layer.setStyle({ ...(lit ? litRegionStyle : baseRegionStyle), opacity: hidden ? 0 : 1, fillOpacity: hidden ? 0 : 1 });
     if (layer.getElement()) layer.getElement().style.pointerEvents = hidden ? "none" : "";
@@ -354,29 +365,31 @@
       .map(r => ({left:r.left-view.left, right:r.right-view.left, top:r.top-view.top, bottom:r.bottom-view.top}));
     const candidates = [];
     for (const layer of layers) {
-      if (layer === hiddenProvince || layer === hiddenCountry || (shrinking && !nameMarkers.has(layer))) continue;
-      if (!namePoints.has(layer.feature.geometry)) {
-        namePoints.set(layer.feature.geometry, labelShape(layer.feature.geometry, ([lng, lat]) => {
+      if (sameWorldRegion(layer, hiddenProvince) || sameWorldRegion(layer, hiddenCountry) || (shrinking && !nameMarkers.has(layer))) continue;
+      const sourceGeometry = layer.feature._sourceGeometry || layer.feature.geometry;
+      if (!namePoints.has(sourceGeometry)) {
+        namePoints.set(sourceGeometry, labelShape(sourceGeometry, ([lng, lat]) => {
           const {x, y} = map.project([lat, lng], 0); return [x, y];
         }));
       }
-      const shape = namePoints.get(layer.feature.geometry);
+      const shape = namePoints.get(sourceGeometry);
+      const worldX = (layer.feature._worldOffset || 0) / 360 * map.options.crs.scale(0);
       const p = layer.feature.properties;
       const name = regionName(p);
       if (!shape || !name) continue;
-      const selected = layer === regionSelection?.layer;
+      const selected = sameWorldRegion(layer, regionSelection?.layer);
       const font = Math.min(size.x <= 760 ? 15 : 17, Math.max(10, Math.round(9 + Math.sqrt(Math.min(shape.width, shape.height) * scale) / 3)));
-      const x = shape.anchor[0] * scale - origin.x, y = shape.anchor[1] * scale - origin.y;
+      const x = (shape.anchor[0] + worldX) * scale - origin.x, y = shape.anchor[1] * scale - origin.y;
       if (x < 0 || x > size.x || y < 0 || y > size.y) continue;
       const tier = layer.options.pane === "cities" ? 2 : layer.options.pane === "administrative" ? 1 : 0;
-      candidates.push({layer, name, p, shape, selected, font, x, y, tier});
+      candidates.push({layer, name, p, shape, selected, font, x, y, tier, worldX});
     }
     candidates.sort((a, b) => Number(b.selected) - Number(a.selected) || b.tier - a.tier || b.shape.area - a.shape.area);
     const boxes = [], visible = new Set();
     // Reserve room for full names first. Tiny regions get a centered badge, never
     // a label moved into a neighboring region; coincident badges wait for zoom.
     for (const compact of shrinking ? [false] : [false, true]) {
-      for (const {layer, name, p, shape, selected, font, x, y, tier} of candidates) {
+      for (const {layer, name, p, shape, selected, font, x, y, tier, worldX} of candidates) {
         if (visible.has(layer)) continue;
         let marker = nameMarkers.get(layer);
         const options = shrinking ? [marker.options.labelVariant] : labelOptions(name, p, font, compact);
@@ -394,7 +407,7 @@
           boxes.push(box);
           if (shrinking) break;
           if (!marker) {
-            const anchor = map.unproject(L.point(...shape.anchor), 0);
+            const anchor = map.unproject(L.point(shape.anchor[0] + worldX, shape.anchor[1]), 0);
             marker = L.marker(anchor, {interactive:false, keyboard:false,
               icon:L.divIcon({className:"region-name", html:"<span></span>", iconSize:[0,0], iconAnchor:[0,0]})}).addTo(map);
             nameMarkers.set(layer, marker);
@@ -455,13 +468,13 @@
     cityLayer.clearLayers();
     const previous = hiddenProvince;
     hiddenProvince = null;
-    if (previous) paintRegion(previous);
+    if (previous) adminLayer.eachLayer(layer => { if (sameWorldRegion(layer, previous)) paintRegion(layer); });
     updateRegionNames();
   }
   function restoreCountry() {
     const previous = hiddenCountry;
     hiddenCountry = null;
-    if (previous) paintRegion(previous);
+    if (previous) countryLayer.eachLayer(layer => { if (sameWorldRegion(layer, previous)) paintRegion(layer); });
   }
   function zoomToRegion(layer, name, latlng, maxZoom = 9) {
     const bounds = layer.getBounds();
@@ -484,7 +497,8 @@
     askAdd(e.latlng, regionName(feature.properties));
     return true;
   }
-  const countryLayer = L.geoJSON(null, { pane:"countries", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+  const countryLayer = L.geoJSON(null, { pane:"countries", renderer:L.svg({pane:"countries",padding:1}), noClip:true, style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("add", () => paintRegion(layer));
     layer.on("click", (e) => {
       if (pickRegion(e, feature)) return;
       const code = feature.properties?.ADM0_A3 || feature.properties?.ADM0_A3_EH;
@@ -501,7 +515,8 @@
     });
     paintRegion(layer);
   } }).addTo(map);
-  const adminLayer = L.geoJSON(null, { pane:"administrative", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+  const adminLayer = L.geoJSON(null, { pane:"administrative", renderer:L.svg({pane:"administrative",padding:1}), noClip:true, style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("add", () => paintRegion(layer));
     layer.on("click", (e) => {
       if (pickRegion(e, feature)) return;
       const revision = ++regionRevision;
@@ -512,7 +527,8 @@
     });
     paintRegion(layer);
   } }).addTo(map);
-  const cityLayer = L.geoJSON(null, { pane:"cities", style: baseRegionStyle, onEachFeature: (feature, layer) => {
+  const cityLayer = L.geoJSON(null, { pane:"cities", renderer:L.svg({pane:"cities",padding:1}), noClip:true, style: baseRegionStyle, onEachFeature: (feature, layer) => {
+    layer.on("add", () => paintRegion(layer));
     layer.on("click", (e) => {
       if (pickRegion(e, feature)) return;
       ++regionRevision;
@@ -540,9 +556,9 @@
       if (revision !== regionRevision) return;
       const features = data.features.filter((f) => f.properties?.name);
       if (!features.length) throw Error("没有市级边界");
-      cityLayer.addData({ type: "FeatureCollection", features });
+      cityLayer.addData({ type: "FeatureCollection", features:repeatWorldFeatures(features, worldOffsets) });
       hiddenProvince = province;
-      paintRegion(province);
+      adminLayer.eachLayer(layer => { if (sameWorldRegion(layer, province)) paintRegion(layer); });
       renderVisitedRegions();
       $("#mapCaption").textContent = `${province.feature.properties.name} · 点击城市／区继续放大`;
       notify("市／区地图已载入，点击地区可放大并记录旅行");
@@ -557,9 +573,9 @@
       if (countryCode === "CHN") {
         const data = await chinaBoundaries(100000);
         if (revision !== regionRevision) return;
-        adminLayer.addData({ type: "FeatureCollection", features: data.features.filter((f) => f.properties?.name) });
+        adminLayer.addData({ type: "FeatureCollection", features:repeatWorldFeatures(data.features.filter((f) => f.properties?.name), worldOffsets) });
         hiddenCountry = country;
-        paintRegion(country);
+        countryLayer.eachLayer(layer => { if (sameWorldRegion(layer, country)) paintRegion(layer); });
         renderVisitedRegions();
         $("#mapCaption").textContent = "中国 · 点击省份查看市级地图";
         notify("点击省份进入市级地图；直辖市按区展示");
@@ -578,9 +594,9 @@
       });
       if (!features.length) throw Error("没有找到省／州边界");
       adminLayer.clearLayers();
-      adminLayer.addData({ type: "FeatureCollection", features });
+      adminLayer.addData({ type: "FeatureCollection", features:repeatWorldFeatures(features, worldOffsets) });
       hiddenCountry = country;
-      paintRegion(country);
+      countryLayer.eachLayer(layer => { if (sameWorldRegion(layer, country)) paintRegion(layer); });
       renderVisitedRegions();
       $("#mapCaption").textContent = `${adminCountryNames[countryCode]} · 点击省／州继续放大`;
       refreshMapActions();
@@ -610,7 +626,7 @@
       if (!response.ok) throw Error("Map data unavailable");
       const data = await response.json();
       if (!data.features?.length) throw Error("No country boundaries");
-      countryLayer.addData(data);
+      countryLayer.addData({type:"FeatureCollection",features:repeatWorldFeatures(data.features, worldOffsets)});
       map.invalidateSize({animate:false});
       renderVisitedRegions();
       $("#mapStatus").hidden = true;
@@ -677,18 +693,22 @@
     $("#placeList").innerHTML = places.length ? places.map((p) => `<button class="place-row ${p.id === selectedId ? "active" : ""}" data-id="${esc(p.id)}"><span class="place-emoji">\u{1F4CD}</span><span><strong>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</strong><small>${esc(dateLabel(p.date))}</small></span></button>`).join("") : '<div class="empty-list">\u8FD8\u6CA1\u6709\u65C5\u884C\u8DB3\u8FF9\u3002<br>\u641C\u7D22\u4E00\u5EA7\u57CE\u5E02\uFF0C\u6216\u5728\u5730\u56FE\u4E0A\u70B9\u4E00\u4E0B\uFF0C\u6536\u85CF\u4F60\u4EEC\u4E00\u8D77\u53BB\u8FC7\u7684\u5730\u65B9\u3002</div>';
     places.forEach((p) => {
       if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return;
-      let m = markers.get(p.id);
-      if (!m) {
-        const placeId = p.id;
-        m = L.marker([p.lat, p.lng], { icon: markerIcon(placeId === selectedId) }).addTo(map).on("click", () => selectPlace(placeId));
-        markers.set(p.id, m);
-      } else {
-        if (!m.getLatLng().equals([p.lat, p.lng])) m.setLatLng([p.lat, p.lng]);
-        if (m.options.icon.options.className !== (p.id === selectedId ? "selected-pin" : "")) m.setIcon(markerIcon(p.id === selectedId));
+      for (const offset of worldOffsets) {
+        const markerKey = p.id + "@" + offset;
+        const position = [p.lat, wrapLongitude(p.lng) + offset];
+        let m = markers.get(markerKey);
+        if (!m) {
+          const placeId = p.id;
+          m = L.marker(position, { icon: markerIcon(placeId === selectedId), placeId }).addTo(map).on("click", () => selectPlace(placeId));
+          markers.set(markerKey, m);
+        } else {
+          if (!m.getLatLng().equals(position)) m.setLatLng(position);
+          if (m.options.icon.options.className !== (p.id === selectedId ? "selected-pin" : "")) m.setIcon(markerIcon(p.id === selectedId));
+        }
+        m.bindPopup(`<b>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</b><br><span>${esc(dateLabel(p.date))}</span>`);
       }
-      m.bindPopup(`<b>${esc(p.name || "\u672A\u547D\u540D\u5730\u70B9")}</b><br><span>${esc(dateLabel(p.date))}</span>`);
     });
-    for (const [key, m] of markers) if (!places.some((p) => p.id === key)) {
+    for (const [key, m] of markers) if (!places.some((p) => p.id === m.options.placeId)) {
       map.removeLayer(m);
       markers.delete(key);
     }
@@ -768,7 +788,11 @@
     refreshCloud(true);
     openPanel();
     const p = places.find((x) => x.id === placeId);
-    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) map.panTo([p.lat, p.lng], motion(0.45));
+    if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+      const lng = wrapLongitude(p.lng);
+      const nearest = lng + Math.round((map.getCenter().lng - lng) / 360) * 360;
+      map.panTo([p.lat, nearest], motion(0.45));
+    }
   }
   function refreshMapActions() {
     const hint = $(".map-hint");
@@ -783,7 +807,7 @@
     if ($("#addModal").open || (selectedId && !closePanel())) return;
     pickingPoint = false;
     refreshMapActions();
-    pendingPoint = { lat: latlng.lat, lng: latlng.lng };
+    pendingPoint = { lat: latlng.lat, lng: wrapLongitude(latlng.lng) };
     $("#modalCoords").textContent = name ? `记录位置：${name}` : "记录地图上选中的位置";
     $("#newName").value = name;
     $("#newDate").value = "";
