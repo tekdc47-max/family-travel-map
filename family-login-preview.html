@@ -99,6 +99,9 @@
   </section>
   <dialog id="accountAdminDialog" class="modal" aria-labelledby="accountAdminTitle">
     <h2 id="accountAdminTitle">家庭账号管理</h2>
+    <p id="accountAdminCount">正在读取账号…</p>
+    <div id="accountAdminList" aria-label="共享账号列表"></div>
+    <p>已有密码不可查看。选中账号后可设置至少 6 位的新密码。</p>
     <div class="field"><label for="accountAdminTarget">共享成员</label><select id="accountAdminTarget"></select></div>
     <form id="accountAdminForm" method="post" autocomplete="off" hidden>
       <div class="field" data-account-role><label for="accountAdminRole">地图权限</label>
@@ -117,6 +120,7 @@
         <button class="save-btn" value="role" hidden>保存权限</button>
         <button class="cancel-btn" value="credentials" hidden>保存登录信息</button>
         <button class="delete-btn" value="remove" hidden>撤销访问</button>
+        <button class="delete-btn" value="delete" hidden>删除账号</button>
       </div>
     </form>
     <p role="status" aria-live="polite"></p>
@@ -126,6 +130,11 @@
     #accountAdminDialog{max-height:calc(100dvh - 32px);overflow:auto}
     #accountAdminDialog select{width:100%;padding:10px 12px;font:inherit;font-size:16px;color:inherit;background:#f8fcfa;border:1px solid #a9c5bb;border-radius:12px}
     #accountAdminDialog .modal-actions{flex-wrap:wrap}
+    #accountAdminList{max-height:220px;overflow:auto;margin:12px 0;border-block:1px solid #b9cec5}
+    #accountAdminList button{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:44px;padding:11px 4px;border:0;border-bottom:1px solid #dce8e2;background:transparent;color:inherit;text-align:left;overflow-wrap:anywhere}
+    #accountAdminList button[aria-pressed=true]{background:#dbeee7}
+    #accountAdminList small{flex:none;color:#365b50}
+    #accountAdminList button:focus-visible{outline:2px solid #116a5d;outline-offset:-2px}
     #accountAdminDialog [hidden],#accountAdminOpen[hidden]{display:none!important}
   </style>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -156,7 +165,7 @@
   import {labelShape, labelFits} from "./region-labels.js";
   import {applyGlassRefraction} from "./family-glass-refraction-32a4d6b812.js?v=20261111-convex";
   import {connectFamilyMap} from './family-cloud-3916f37072.js';
-  import {mountAccountAdmin} from './family-account-admin-31cff593af.js';
+  import {mountAccountAdmin} from './family-account-admin-3fd7229025.js';
   const login = document.getElementById('cloudLogin');
   const loginStatus = login.querySelector('[role=status]');
   const publicKey = "sb_publishable_Q9QyR_4MxvnR4jQhRmH47A_Kttc7i7p";
