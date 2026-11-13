@@ -781,6 +781,7 @@
     return true;
   }
   function selectPlace(placeId) {
+    exitPointPicking();
     if (placeId === selectedId) return;
     if (!canLeaveDetails()) return;
     selectedId = placeId;
@@ -802,11 +803,15 @@
     $("#addLabel").textContent = pickingPoint ? "取消选点" : regionSelection ? "记录到这里" : "添加地点";
     updateRegionNames();
   }
-  function askAdd(latlng, name = "") {
-    if (!cloud.canEdit) return;
-    if ($("#addModal").open || (selectedId && !closePanel())) return;
+  function exitPointPicking() {
+    if (!pickingPoint) return;
     pickingPoint = false;
     refreshMapActions();
+  }
+  function askAdd(latlng, name = "") {
+    if (!cloud.canEdit) return;
+    exitPointPicking();
+    if ($("#addModal").open || (selectedId && !closePanel())) return;
     pendingPoint = { lat: latlng.lat, lng: wrapLongitude(latlng.lng) };
     $("#modalCoords").textContent = name ? `记录位置：${name}` : "记录地图上选中的位置";
     $("#newName").value = name;
@@ -815,7 +820,7 @@
     $("#addModal").showModal();
     settleMaterial($("#addModal"), 300);
   }
-  map.on("click", (e) => askAdd(e.latlng));
+  map.on("click", (e) => { if (pickingPoint) askAdd(e.latlng); });
   $("#addBtn").onclick = () => {
     if (regionSelection && !pickingPoint) askAdd(regionSelection.latlng, regionSelection.name);
     else { pickingPoint = !pickingPoint; refreshMapActions(); }
@@ -823,6 +828,7 @@
   $("#locateBtn").onclick = returnToWorld;
   $("#closePanel").onclick = () => closePanel();
   $("#cancelAdd").onclick = () => { if (!$("#confirmAdd").disabled) $("#addModal").close(); };
+  $("#addModal").addEventListener("close", () => { pendingPoint = null; exitPointPicking(); });
   $("#addModal").oncancel = (e) => { if ($("#confirmAdd").disabled) e.preventDefault(); };
   $("#addModal").onclick = (e) => {
     if (e.target === $("#addModal")) {
@@ -832,8 +838,7 @@
   };
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && !$("#addModal").open && pickingPoint) {
-      pickingPoint = false;
-      refreshMapActions();
+      exitPointPicking();
     }
   });
   $("#confirmAdd").onclick = async () => {
