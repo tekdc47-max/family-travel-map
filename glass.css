@@ -488,3 +488,75 @@ body.has-foreground .rail {background:var(--glass-clear)!important}
   .rail::before,.rail::after {content:none}
   .map-actions .pill-btn.primary {background:#285f4c!important}
 }
+
+/* Public map credits stay available without a long strip across the map. */
+.leaflet-control-attribution {padding:0!important;background:transparent!important}
+.map-credits {position:relative;color:#31544c;text-align:left}
+.map-credits summary {
+  list-style:none;cursor:pointer;min-height:30px;padding:7px 10px;border-radius:999px;
+  background:#f8fcfacc;border:1px solid #ffffffa6;font-family:inherit;font-weight:500;font-size:10px;line-height:1.4;
+}
+.map-credits summary::-webkit-details-marker {display:none}
+.map-credits>div {
+  position:absolute;right:0;bottom:calc(100% + 8px);width:240px;max-width:calc(100vw - 32px);
+  padding:14px 16px;border:1px solid #fff;border-radius:16px;background:#f8fcfa;
+  box-shadow:0 6px 24px #123c2924;display:grid;gap:4px;
+}
+.map-credits a {font-size:13px;font-weight:650;color:#175e4e}
+.map-credits span {font-size:11px;line-height:1.6;color:#526b62}
+.map-credits a:not(:first-child) {margin-top:7px}
+.map-credits summary:focus-visible {outline:2px solid #176c58;outline-offset:3px}
+
+/* A public, still map supplies colour through the login lens. No family data. */
+.login-scenery {
+  position:fixed;inset:0;z-index:2050;pointer-events:none;
+  background:radial-gradient(ellipse at 24% 18%,#eef8f1c4,transparent 65%),#d9eae6;
+}
+.login-scenery[hidden] {display:none}
+.login-scenery img {width:100%;height:100%;object-fit:cover;object-position:58% 50%;opacity:.82}
+#cloudLogin {
+  max-height:calc(100dvh - 32px);overflow:auto;isolation:isolate;border-radius:28px;
+  color:#173f35;border:1px solid #ffffffb5;
+  background:linear-gradient(155deg,#ffffff40,#ffffff17 55%,#dcfff330);
+  -webkit-backdrop-filter:blur(2px) var(--glass-lens,blur(0px)) saturate(1.3);
+  backdrop-filter:blur(2px) var(--glass-lens,blur(0px)) saturate(1.3);
+  box-shadow:var(--glass-rim),0 2px 4px #123c2910,0 18px 55px #123c2926;
+}
+.login-mark {display:block;width:30px;height:38px;margin-bottom:14px;color:#226650}
+#cloudLogin h2 {margin-top:0;font-size:25px;letter-spacing:-.6px}
+#cloudLogin p,#cloudLogin label,#cloudLogin summary {color:#284d41}
+#cloudLogin .field input {background:#ffffffa8;border:1px solid #ffffffc9;color:#173f35;border-radius:14px;box-shadow:inset 0 1px 2px #123c2910}
+#cloudLogin .save-btn {background:linear-gradient(155deg,#175f4ef2,#164f44eb);border:1px solid #ffffff75;border-radius:999px;box-shadow:var(--glass-rim),0 3px 10px #123c2920}
+#cloudLogin summary {min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:13px}
+#cloudLogin [role=status]:empty {display:none}
+
+/* A quick press and a small spring on release, shared by touch and keyboard. */
+:is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link,.search-result,.place-row,.leaflet-bar a,.map-credits summary) {
+  transition:transform 360ms cubic-bezier(.22,1.24,.36,1),opacity 160ms ease,box-shadow 220ms ease;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.pill-btn:hover,.icon-btn:hover {transform:scale(1)}
+:is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link,.search-result,.place-row,.leaflet-bar a,.map-credits summary):active:not(:disabled) {
+  transform:scale(.955);transition-duration:85ms;transition-timing-function:cubic-bezier(.2,.8,.3,1);
+}
+:is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link):not(:disabled) {position:relative;isolation:isolate}
+:is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link)::before {
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.4;
+  background:radial-gradient(ellipse at 50% 5%,#ffffff45,transparent 75%);
+  transition:opacity 220ms ease;
+}
+:is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link):active:not(:disabled)::before {opacity:1}
+@media(max-width:760px) {
+  #cloudLogin {padding:24px;border-radius:26px}
+}
+@media(pointer:coarse) {
+  .map-credits summary {min-height:44px;display:flex;align-items:center;padding:6px 12px}
+  .map-credits a {min-height:36px;display:flex;align-items:center}
+}
+@media(prefers-reduced-transparency:reduce) {
+  #cloudLogin,#cloudLogin .field input,.map-credits summary {background:#f8fcfa!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+@media(prefers-reduced-motion:reduce) {
+  :is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link,.search-result,.place-row,.leaflet-bar a,.map-credits summary) {transition:none!important}
+  :is(.pill-btn,.icon-btn,.save-btn,.cancel-btn,.delete-btn,.panel-close,.add-photo,.backup-link,.search-result,.place-row,.leaflet-bar a,.map-credits summary):is(:hover,:active) {transform:none!important}
+}

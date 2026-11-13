@@ -53,7 +53,7 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
-  <link rel="stylesheet" href="./family-glass-7362b6cea1.css?v=20261112-wrap">
+  <link rel="stylesheet" href="./family-glass-1c49be32eb.css?v=20261112-wrap">
 </head>
 <body>
   <main class="app" id="cloudMap" style="visibility:hidden" inert>
@@ -82,7 +82,9 @@
   </main>
   <dialog id="addModal" class="modal" aria-labelledby="modalTitle"><h2 id="modalTitle">添加旅行地点</h2><p id="modalCoords">在地图上选中的位置</p><div class="field"><label for="newName">地点名称</label><input id="newName" maxlength="80" placeholder="例如：东京" autofocus></div><div class="field"><label for="newDate">旅行日期（可稍后补充）</label><input id="newDate" type="date"></div><p id="addError" role="alert" hidden></p><div class="modal-actions"><button id="cancelAdd" class="cancel-btn">取消</button><button id="confirmAdd" class="save-btn">添加地点</button></div></dialog>
   
+  <div id="cloudLoginBackdrop" class="login-scenery" aria-hidden="true"><img src="./family-login-world.svg" alt=""></div>
   <section id="cloudLogin" class="modal" aria-labelledby="cloudTitle" style="position:fixed;inset:0;margin:auto;width:min(420px,calc(100% - 32px));height:max-content;z-index:2100">
+    <svg class="login-mark" viewBox="0 0 32 40" fill="none" aria-hidden="true"><path d="M16 37S3 25 3 15a13 13 0 0 1 26 0c0 10-13 22-13 22Z" stroke="currentColor" stroke-width="2.2"/><circle cx="16" cy="15" r="4.5" stroke="currentColor" stroke-width="2.2"/></svg>
     <h2 id="cloudTitle">家庭旅行地图</h2>
     <p>使用管理员发给你的账号登录，查看一家人的旅行足迹。</p>
     <form id="familyPasswordLogin" method="post">
@@ -187,11 +189,13 @@
       loginStatus.textContent = '登录服务暂不可用，请稍后重试。';
     }
   }
+  if (!cloud) applyGlassRefraction([login]);
   if (cloud) {
   const cloudMap = document.getElementById('cloudMap');
   cloudMap.removeAttribute('inert');
   cloudMap.style.visibility = '';
   login.hidden = true;
+  document.getElementById('cloudLoginBackdrop').hidden = true;
   document.getElementById('cloudRole').textContent = cloud.canEdit ? '家庭共享 · 可编辑' : '家庭共享 · 仅查看';
   document.getElementById('cloudSignOut').onclick = async () => {
     try { await cloud.signOut(); } catch { alert('退出未完成，请重试。'); }
@@ -253,7 +257,7 @@
     syncForeground();
   }));
   applyGlassRefraction(document.querySelectorAll(".rail,.map-caption,.map-actions button,.leaflet-control-zoom,.panel"));
-  map.attributionControl.addAttribution('World boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>');
+  map.attributionControl.setPrefix(false).addAttribution('<details class="map-credits"><summary title="地图来源与许可">地图信息</summary><div><a href="https://leafletjs.com/" target="_blank" rel="noreferrer">Leaflet</a><span>地图交互组件</span><a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a><span>世界行政区边界 · 公共领域数据</span></div></details>');
   for (const [name, order] of [["countries", 400], ["administrative", 410], ["cities", 420]]) {
     map.createPane(name).style.zIndex = order;
   }

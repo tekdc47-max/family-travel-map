@@ -51,7 +51,7 @@
     @media(max-width:760px){.app{grid-template-columns:1fr}.rail{padding:12px 14px;border-radius:18px;max-height:36dvh;box-shadow:var(--shadow)}.brand{margin-bottom:10px}.brand h1{font-size:17px}.brand p{display:none}.section-head{margin-top:10px}.place-list{max-height:72px}.place-row{padding:8px}.place-row strong{font-size:14px}.place-row small{margin-top:3px}.empty-list{margin:4px 0;padding:10px;font-size:14px}.map-top{top:auto;left:14px;right:14px;bottom:82px}.map-hint{bottom:20px;font-size:12px}.panel-head{padding:18px}.panel-body{padding:18px}.leaflet-control-zoom{margin-bottom:156px!important}.search{height:44px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
   </style>
-  <link rel="stylesheet" href="./glass.css?v=7362b6cea1-restore">
+  <link rel="stylesheet" href="./glass.css?v=1c49be32eb">
 </head>
 <body>
   <main class="app">
@@ -170,7 +170,7 @@
     syncForeground();
   }));
   applyGlassRefraction(document.querySelectorAll(".rail,.map-caption,.map-actions button,.leaflet-control-zoom,.panel"));
-  map.attributionControl.addAttribution('World boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a>');
+  map.attributionControl.setPrefix(false).addAttribution('<details class="map-credits"><summary title="地图来源与许可">地图信息</summary><div><a href="https://leafletjs.com/" target="_blank" rel="noreferrer">Leaflet</a><span>地图交互组件</span><a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a><span>世界行政区边界 · 公共领域数据</span></div></details>');
   for (const [name, order] of [["countries", 400], ["administrative", 410], ["cities", 420]]) {
     map.createPane(name).style.zIndex = order;
   }
